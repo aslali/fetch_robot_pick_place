@@ -44,7 +44,7 @@ class SHSCPackaging:
         self.workspace5_y0 = self.workspace_table_y + 4*self.workspace_table_length//5 + 10
 
         self.boxes_width = 20
-        self.compartments = {1: [], 2: [], 3: [], 4: [], 5: []}
+        self.compartments_handle = {1: [], 2: [], 3: [], 4: [], 5: []}
         self.w1b_x0, self.w1b_y0 = self.boxes_x_y(self.workspace1_x0, self.workspace1_y0)
         self.ws1_box_pos = []
 
@@ -139,10 +139,11 @@ class SHSCPackaging:
             self.ws1_box_pos.append([self.w1b_x0[i], self.w1b_y0[i],
                                     self.w1b_x0[i] + self.boxes_width,
                                     self.w1b_y0[i] + self.boxes_width])
-            comp = self.canvas.create_rectangle(self.w1b_x0[i], self.w1b_y0[i],
+            h = self.canvas.create_rectangle(self.w1b_x0[i], self.w1b_y0[i],
                                          self.w1b_x0[i] + self.boxes_width,
                                          self.w1b_y0[i] + self.boxes_width, width=2,
                                          outline='#000', fill='white')
+            self.compartments_handle[1].append(h)
             self.canvas.create_text((self.w1b_x0[i]+self.boxes_width//2, self.w1b_y0[i]+self.boxes_width//2), text=str(i+1))
 
         ###################################################################################
@@ -159,10 +160,11 @@ class SHSCPackaging:
             self.ws1_box_pos.append([self.w2b_x0[i], self.w2b_y0[i],
                                     self.w2b_x0[i] + self.boxes_width,
                                     self.w2b_y0[i] + self.boxes_width])
-            self.canvas.create_rectangle(self.w2b_x0[i], self.w2b_y0[i],
+            h = self.canvas.create_rectangle(self.w2b_x0[i], self.w2b_y0[i],
                                          self.w2b_x0[i] + self.boxes_width,
                                          self.w2b_y0[i] + self.boxes_width, width=2,
                                          outline='#000', fill='white')
+            self.compartments_handle[2].append(h)
             self.canvas.create_text((self.w2b_x0[i] + self.boxes_width // 2, self.w2b_y0[i] + self.boxes_width // 2),
                                     text=str(i + 1))
 
@@ -180,10 +182,11 @@ class SHSCPackaging:
             self.ws1_box_pos.append([self.w3b_x0[i], self.w3b_y0[i],
                                     self.w3b_x0[i] + self.boxes_width,
                                     self.w3b_y0[i] + self.boxes_width])
-            self.canvas.create_rectangle(self.w3b_x0[i], self.w3b_y0[i],
+            h =self.canvas.create_rectangle(self.w3b_x0[i], self.w3b_y0[i],
                                          self.w3b_x0[i] + self.boxes_width,
                                          self.w3b_y0[i] + self.boxes_width, width=2,
                                          outline='#000', fill='white')
+            self.compartments_handle[3].append(h)
             self.canvas.create_text((self.w3b_x0[i] + self.boxes_width // 2, self.w3b_y0[i] + self.boxes_width // 2),
                                     text=str(i + 1))
 
@@ -201,10 +204,11 @@ class SHSCPackaging:
             self.ws1_box_pos.append([self.w4b_x0[i], self.w4b_y0[i],
                                     self.w4b_x0[i] + self.boxes_width,
                                     self.w4b_y0[i] + self.boxes_width])
-            self.canvas.create_rectangle(self.w4b_x0[i], self.w4b_y0[i],
+            h = self.canvas.create_rectangle(self.w4b_x0[i], self.w4b_y0[i],
                                          self.w4b_x0[i] + self.boxes_width,
                                          self.w4b_y0[i] + self.boxes_width, width=2,
                                          outline='#000', fill='white')
+            h = self.compartments_handle[4].append(h)
             self.canvas.create_text((self.w4b_x0[i] + self.boxes_width // 2, self.w4b_y0[i] + self.boxes_width // 2),
                                     text=str(i + 1))
 
@@ -222,18 +226,19 @@ class SHSCPackaging:
             self.ws1_box_pos.append([self.w5b_x0[i], self.w5b_y0[i],
                                     self.w5b_x0[i] + self.boxes_width,
                                     self.w5b_y0[i] + self.boxes_width])
-            self.canvas.create_rectangle(self.w5b_x0[i], self.w5b_y0[i],
+            h = self.canvas.create_rectangle(self.w5b_x0[i], self.w5b_y0[i],
                                          self.w5b_x0[i] + self.boxes_width,
                                          self.w5b_y0[i] + self.boxes_width, width=2,
                                          outline='#000', fill='white')
+            self.compartments_handle[5].append(h)
             self.canvas.create_text((self.w5b_x0[i] + self.boxes_width // 2, self.w5b_y0[i] + self.boxes_width // 2),
                                     text=str(i + 1))
 
 
         self.canvas.pack()
         self.root.update_idletasks()
-        input()
-        self.canvas.itemconfig(ws1[1], fill='red')
+
+
 #
 #
 #

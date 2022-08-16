@@ -11,4 +11,6 @@ pattern_col = {1: [col['o'], col['b'], col['p'], col['p'], col['g']],
 
 sim_env = se.SHSCPackaging(pattern_col, fast_run=False)
 
+
+sim_env.canvas.itemconfig(sim_env.compartments_handle[2][1], fill='red')
 sim_env.root.mainloop()
