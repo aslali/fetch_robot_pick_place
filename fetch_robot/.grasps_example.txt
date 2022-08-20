@@ -1,0 +1,120 @@
+primitives: 
+  - 
+    type: 1
+    dimensions: [0.9557151198387146, 0.02523338794708252, 0.37818509340286255]
+primitive_poses: 
+  - 
+    position: 
+      x: 0.946464300156
+      y: -0.191770970821
+      z: 0.976993501186
+    orientation: 
+      x: -0.000819940236397
+      y: -0.00307066901587
+      z: -0.774221718311
+      w: 0.632906496525
+meshes: []
+mesh_poses: []
+surface: 
+  coef: [0.0, 0.0, 0.0, 0.0], [id: ''
+pre_grasp_posture: 
+  header: 
+    seq: 0
+    stamp: 
+      secs: 0
+      nsecs:         0
+    frame_id: ''
+  joint_names: 
+    - l_gripper_finger_joint
+    - r_gripper_finger_joint
+  points: 
+    - 
+      positions: [0.02261669397354126, 0.02261669397354126]
+      velocities: []
+      accelerations: []
+      effort: [50.0, 50.0]
+      time_from_start: 
+        secs: 2
+        nsecs:         0
+grasp_posture: 
+  header: 
+    seq: 0
+    stamp: 
+      secs: 0
+      nsecs:         0
+    frame_id: ''
+  joint_names: 
+    - l_gripper_finger_joint
+    - r_gripper_finger_joint
+  points: 
+    - 
+      positions: [0.0, 0.0]
+      velocities: []
+      accelerations: []
+      effort: [50.0, 50.0]
+      time_from_start: 
+        secs: 2
+        nsecs:         0
+grasp_pose: 
+  header: 
+    seq: 0
+    stamp: 
+      secs: 1637961172
+      nsecs: 675281184
+    frame_id: "base_link"
+  pose: 
+    position: 
+      x: 0.945616019898
+      y: -0.189706929714
+      z: 1.31107856123
+    orientation: 
+      x: -0.546659378095
+      y: -0.445182083966
+      z: 0.548254903564
+      w: -0.449881047367
+grasp_quality: 1.0
+pre_grasp_approach: 
+  direction: 
+    header: 
+      seq: 0
+      stamp: 
+        secs: 0
+        nsecs:         0
+      frame_id: "wrist_roll_link"
+    vector: 
+      x: 1.0
+      y: 0.0
+      z: 0.0
+  desired_distance: 0.15000000596
+  min_distance: 0.10000000149
+post_grasp_retreat: 
+  direction: 
+    header: 
+      seq: 0
+      stamp: 
+        secs: 0
+        nsecs:         0
+      frame_id: "wrist_roll_link"
+    vector: 
+      x: -1.0
+      y: 0.0
+      z: 0.0
+  desired_distance: 0.15000000596
+  min_distance: 0.10000000149
+post_place_retreat: 
+  direction: 
+    header: 
+      seq: 0
+      stamp: 
+        secs: 0
+        nsecs:         0
+      frame_id: ''
+    vector: 
+      x: 0.0
+      y: 0.0
+      z: 0.0
+  desired_distance: 0.0
+  min_distance: 0.0
+max_contact_force: 0.0
+allowed_touch_objects: [], id: ''
+
