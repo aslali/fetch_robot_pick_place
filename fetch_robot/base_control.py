@@ -14,15 +14,6 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from math import sin, cos, pi
 from socket import *
 
-IP = "kd-pc29.local"
-PORT = 8080
-
-s = socket(AF_INET, SOCK_STREAM)
-try:
-    s.connect((IP, PORT))
-except error:
-    s = None
-
 
 class BaseControl(object):
     """ Move base and navigation """
@@ -87,7 +78,6 @@ class BaseControl(object):
         elif (second is not None) and (distance is not None):
             print("only one of second or distance!")
 
-
     def move_backward(self, second=None, distance=None, speed=-0.2):
         tw = geometry_msgs.msg.Twist()
         if (second is None) and (distance is None):
@@ -119,8 +109,6 @@ class BaseControl(object):
             print(cur_pos)
         elif (second is not None) and (distance is not None):
             print("only one of second or distance!")
-
-
 
     def turn_left(self, angle=0.2):
         tw = geometry_msgs.msg.Twist()

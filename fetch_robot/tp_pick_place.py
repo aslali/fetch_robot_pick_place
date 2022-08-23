@@ -1,6 +1,5 @@
 import time
-from tp_parameters import PICK_TABLE_POS, PLACE_TABLE_POS, PLACE_IDS
-import tp_blocks
+from .tp_parameters import PICK_TABLE_POS, PLACE_TABLE_POS, PLACE_IDS
 import copy
 from math import pi
 import numpy as np
@@ -237,6 +236,7 @@ def head_slow_sweep(max_turn):
 if __name__ == '__main__':
     import rospy
     from tp_initialize_robot import RobotControl
+    import tp_blocks
     rospy.init_node('test_code')
     robot_con = RobotControl()
     block_count = tp_blocks.Blocks()

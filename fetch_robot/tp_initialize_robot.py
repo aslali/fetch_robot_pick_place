@@ -1,10 +1,10 @@
-from base_control import BaseControl
-from head_control import HeadControl
-from arm_control import ArmControl
-from torso_control import TorsoControl
-from gripper_control import GripperControl
-from fetch_detect_markers import Fetch_markers
-from pickplace import PickPlace
+from .base_control import BaseControl
+from .head_control import HeadControl
+from .arm_control import ArmControl
+from .torso_control import TorsoControl
+from .gripper_control import GripperControl
+from .fetch_detect_markers import Fetch_markers
+from .pickplace import PickPlace
 import time
 
 
@@ -35,7 +35,7 @@ class RobotControl:
             time.sleep(6)
 
     def reset_robot(self):
-        if not self.fetch_arm.is_there(arm.stow_values):
+        if not self.fetch_arm.is_there(fetch_arm.stow_values):
             if not self.fetch_torso.is_there(0.4):
                 self.fetch_torso.move_to(0.4, duration=2)
                 time.sleep(2)
