@@ -38,23 +38,8 @@ class Fetch():
         # self.update_sim = not fast_run
         # self.rfast = rfast
 
-    def tasks_required_time(self):
-        for i in range(5):
-            self.task.t_task_all[i] = (self.hum_slopdist['TW1'][0] * 2 / self.human.speed,
-                                       self.rob_slopdist['TW1'][0] * 2 / self.speed + 2)
-            self.task.d_task_all[i] = self.hum_slopdist['TW1'][0] * 2
-        for i in range(5, 10):
-            self.task.t_task_all[i] = (self.hum_slopdist['TW2'][0] * 2 / self.human.speed,
-                                       self.rob_slopdist['TW2'][0] * 2 / self.speed + 2)
-            self.task.d_task_all[i] = self.hum_slopdist['TW2'][0] * 2
-        for i in range(10, 15):
-            self.task.t_task_all[i] = (self.hum_slopdist['TW3'][0] * 2 / self.human.speed,
-                                       self.rob_slopdist['TW3'][0] * 2 / self.speed + 2)
-            self.task.d_task_all[i] = self.hum_slopdist['TW3'][0] * 2
-        for i in range(15, 20):
-            self.task.t_task_all[i] = (self.hum_slopdist['TW4'][0] * 2 / self.human.speed,
-                                       self.rob_slopdist['TW4'][0] * 2 / self.speed + 2)
-            self.task.d_task_all[i] = self.hum_slopdist['TW4'][0] * 2
+
+
             
     def action(self, block_col, pick_loc, place_loc, place_num):
         pickplace(robot_control=self.robot_con, pick_col=block_col, blocks=self.blocks, pick_loc=pick_loc,

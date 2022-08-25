@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+import all_parameters as param
 import random
 
 
@@ -48,6 +49,9 @@ class Task:
     #     self.t_hum_all = self.t_both_human + self.t_only_human + [np.NaN] * self.n_task_robot_only
     #     self.t_rob_all = self.t_both_robot + [np.NaN] * self.n_task_human_only + self.t_only_robot
     #     self.t_task_all = [self.t_hum_all, self.t_rob_all]
+    def tasks_required_time(self):
+        for t in self.task_to_do:
+
 
     def n_tasks(self):
         self.n_task_human_only = len(self.task_only_human)

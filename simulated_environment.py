@@ -3,7 +3,7 @@
 import tkinter
 from tkinter import *
 import math
-from all_parameters import colors
+import all_parameters as param
 
 
 # from mttkinter import mtTkinter
@@ -69,7 +69,7 @@ class SHSCPackaging:
     def creat_pattern_colors(self, pattern):
         for nw, w in enumerate(pattern):
             for b in w:
-                self.pattern_col[nw + 1].append(colors[b])
+                self.pattern_col[nw + 1].append(param.colors[b])
 
     def boxes_x_y(self, x0, y0):
         ys = []
