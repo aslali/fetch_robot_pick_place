@@ -1,6 +1,6 @@
 import simulated_environment as se
 import task_state as ts
-import robot
+# import robot
 
 pattern = [
     ['o', 'b', 'p', 'p', 'g'],
@@ -22,8 +22,8 @@ task_only_robot = []
 task_both = list(range(20))
 
 sim_env = se.SHSCPackaging(pattern, fast_run=False)
-task_state = ts.TaskState()
-robot = robot.Fetch()
+# task_state = ts.TaskState()
+# robot = robot.Fetch()
 # task = Task()
 
 sim_env.canvas.itemconfig(sim_env.compartments_handle[2][1], fill='red')

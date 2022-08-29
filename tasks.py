@@ -39,11 +39,11 @@ class Task:
         self.remained_task_both = []
         self.find_remained_task()
 
-        self.available_color_table = {'g': [0, 1, 2, 3, 4, 5, 6], 'y': [7, 8, 9, 10, 11, 12, 13],
-                                      'b': [14, 15, 16, 17, 18, 19, 20],
-                                      'r': [21, 22, 23, 24, 25, 26, 27]}
-        self.available_color_human_tray = {1: [], 2: [], 3: [], 4: []}
-        self.available_color_robot_tray = {1: [], 2: [], 3: [], 4: []}
+        # self.available_color_table = {'g': [0, 1, 2, 3, 4, 5, 6], 'y': [7, 8, 9, 10, 11, 12, 13],
+        #                               'b': [14, 15, 16, 17, 18, 19, 20],
+        #                               'r': [21, 22, 23, 24, 25, 26, 27]}
+        # self.available_color_human_tray = {1: [], 2: [], 3: [], 4: []}
+        # self.available_color_robot_tray = {1: [], 2: [], 3: [], 4: []}
 
     # def all_time(self):
     #     self.t_hum_all = self.t_both_human + self.t_only_human + [np.NaN] * self.n_task_robot_only
@@ -51,6 +51,22 @@ class Task:
     #     self.t_task_all = [self.t_hum_all, self.t_rob_all]
     def tasks_required_time(self):
         for t in self.task_to_do:
+            task_number = t
+            task_color = self.task_to_do[t][2]
+            if task_color == 'g':
+
+            elif task_color == 'b':
+                pass
+            elif task_color == 'o':
+                pass
+            elif task_color == 'p':
+                pass
+            else:
+                raise Exception('Unknown color')
+            self.t_task_all[t] = (t_human, t_robot)
+
+            self.task.t_task_all[i] = (self.hum_slopdist['TW1'][0] * 2 / self.human.speed,
+                                       self.rob_slopdist['TW1'][0] * 2 / self.speed + 2)
 
 
     def n_tasks(self):
