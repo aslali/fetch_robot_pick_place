@@ -1,7 +1,10 @@
 import simulated_environment as se
 import task_state as ts
-# import robot
+import robot
+import human
+from tasks import Task
 
+human_speed = 10
 pattern = [
     ['o', 'b', 'p', 'p', 'g'],
     ['g', 'b', 'b', 'g', 'o'],
@@ -23,8 +26,11 @@ task_both = list(range(20))
 
 sim_env = se.SHSCPackaging(pattern, fast_run=False)
 # task_state = ts.TaskState()
-# robot = robot.Fetch()
-# task = Task()
+task = Task(task_only_human=task_only_human, task_only_robot=task_only_robot, task_both=task_both,
+            task_to_do=task_to_do, task_precedence_dict=task_precedence_dict, human_speed=human_speed)
+human = human.Human(task=task, sim_env=sim_env, speed=human_speed)
+robot = robot.Fetch(sim_env=sim_env, task=task, human=human)
 
-sim_env.canvas.itemconfig(sim_env.compartments_handle[2][1], fill='red')
+robot.start()
+
 sim_env.root.mainloop()

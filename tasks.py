@@ -5,7 +5,7 @@ import random
 
 
 class Task:
-    def __init__(self, task_only_human, task_only_robot, task_both, task_to_do, task_precedence_dict,
+    def __init__(self, task_only_human, task_only_robot, task_both, task_to_do, task_precedence_dict, human_speed,
                  t_only_human=None, t_only_robot=None, t_both_human=None, t_both_robot=None):
         self.task_only_human = task_only_human
         self.task_only_robot = task_only_robot
@@ -28,6 +28,7 @@ class Task:
 
         self.t_task_all = {}
         self.d_task_all = {}
+        self.human_speed = human_speed
 
         self.task_to_do = task_to_do
 
@@ -54,19 +55,21 @@ class Task:
             task_number = t
             task_color = self.task_to_do[t][2]
             if task_color == 'g':
-
+                t_robot = 10
+                t_human = param.d_human_close / self.human_speed
             elif task_color == 'b':
-                pass
+                t_robot = 30
+                t_human = param.d_human_far / self.human_speed
             elif task_color == 'o':
-                pass
+                t_robot = 30
+                t_human = param.d_human_close / self.human_speed
             elif task_color == 'p':
-                pass
+                t_robot = 10
+                t_human = param.d_human_far / self.human_speed
             else:
                 raise Exception('Unknown color')
             self.t_task_all[t] = (t_human, t_robot)
 
-            self.task.t_task_all[i] = (self.hum_slopdist['TW1'][0] * 2 / self.human.speed,
-                                       self.rob_slopdist['TW1'][0] * 2 / self.speed + 2)
 
 
     def n_tasks(self):
