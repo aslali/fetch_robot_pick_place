@@ -72,7 +72,7 @@ class Fetch(threading.Thread):
         next_robot_turn = False
         isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
         while not isfinished:
-            start_time_total = self.measure.start_time()
+            # start_time_total = self.measure.start_time()
             self.task.find_remained_task()
             self.task.remove_finished_task_precedence()
 
@@ -98,8 +98,8 @@ class Fetch(threading.Thread):
                             self.planner.adaptability_update(human_action=haction,
                                                              action_history=self.interaction_history)
                             self.interaction_history.append(haction)
-                            self.measure.human_dist_follow(start_time=start_time_total, pf=self.planner.palpha,
-                                                           sf=self.planner.alpha_set)
+                            # self.measure.human_dist_follow(start_time=start_time_total, pf=self.planner.palpha,
+                            #                                sf=self.planner.alpha_set)
                 self.cur_allocated_tasks = self.task.tasks_allocated_to_human[:]
 
                 human_wrong_actions = []
@@ -133,8 +133,8 @@ class Fetch(threading.Thread):
                                                            all_human_error=self.human.human_wrong_actions,
                                                            error_info=self.human.wrong_action_info)
                     # self.human.double_error = de[:]
-            self.measure.human_measures(start_time=start_time_total, p_error=self.planner.p_human_error,
-                                        p_following=self.planner.p_human_allocation)
+            # self.measure.human_measures(start_time=start_time_total, p_error=self.planner.p_human_error,
+            #                             p_following=self.planner.p_human_allocation)
             isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
             if not isfinished:
                 if next_robot_turn:
