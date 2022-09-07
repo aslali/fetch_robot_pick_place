@@ -10,7 +10,7 @@ class Fetch(threading.Thread):
     def __init__(self, sim_env, task, human):
         # self.robot_con = RobotControl()
         # self.blocks = tp_blocks.Blocks()
-
+        threading.Thread.__init__(self)
         self.p_human_allocation = 0.8
         self.p_human_error = 0.1
         self.allocation_time_interval = 0
@@ -31,8 +31,8 @@ class Fetch(threading.Thread):
         self.pre_human_wrong_actions = []
         self.human_accuracy_history = []
 
-        self.slop_distance()
-        self.tasks_required_time()
+        # self.slop_distance()
+        # self.tasks_required_time()
 
         self.save_init_sol = False
         self.safe_dist_hr = 180

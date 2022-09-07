@@ -23,14 +23,16 @@ class Task:
         self.human_error_tasks_type2 = set()
         self.n_tasks()
 
-
+        self.task_to_do = task_to_do
         self.task_precedence_dict = task_precedence_dict
 
         self.t_task_all = {}
         self.d_task_all = {}
         self.human_speed = human_speed
+        self.tasks_required_time()
 
-        self.task_to_do = task_to_do
+
+
 
         self.tasks_all = list(range(self.n_task_total))
         self.finished_tasks = []
