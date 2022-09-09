@@ -141,7 +141,8 @@ class Fetch(threading.Thread):
                     fselec = False
                     fschedule = False
                 else:
-                    fselec = self.is_task_selection(new_robot_task, new_human_task)
+                    # fselec = self.is_task_selection(new_robot_task, new_human_task)
+                    fselec = True
                     if fselec:
                         fschedule = True
                     else:
