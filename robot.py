@@ -31,9 +31,6 @@ class Fetch(threading.Thread):
         self.pre_human_wrong_actions = []
         self.human_accuracy_history = []
 
-        # self.slop_distance()
-        # self.tasks_required_time()
-
         self.save_init_sol = False
         self.safe_dist_hr = 180
         # self.measure = measure
@@ -87,7 +84,7 @@ class Fetch(threading.Thread):
             if hum_new_actions:
                 if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot:  # Todo: check why I added self.cur_allocated_task
                     for ts in hum_new_actions:
-                        if self.human.action_right_choose[ts] == 1:
+                        if self.human.action_right2choose[ts] == 1:
                             if ts in self.cur_allocated_tasks:
                                 haction = 1
                             elif ts in self.task.tasks_allocated_to_robot:
@@ -186,12 +183,12 @@ class Fetch(threading.Thread):
                 else:
                     counter += 1
 
-                # next_action, next_robot_turn, available_actions = self.action_from_schedule(timerob=rtiming,
-                #                                                                             available_actions=available_actions,
-                #                                                                             precedence=precedence,
-                #                                                                             count=counter)
-                # self.pre_human_tasks_done = self.human.done_tasks[:]
-                # self.pre_human_wrong_actions = list(self.human.human_wrong_actions.keys())
+                next_action, next_robot_turn, available_actions = self.action_from_schedule(timerob=rtiming,
+                                                                                            available_actions=available_actions,
+                                                                                            precedence=precedence,
+                                                                                            count=counter)
+                self.pre_human_tasks_done = self.human.done_tasks[:]
+                self.pre_human_wrong_actions = list(self.human.human_wrong_actions.keys())
                 # start_time_action = self.measure.start_time()
                 # travel_dist = self.robot_action(next_action)
                 # self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,

@@ -82,7 +82,6 @@ class Task:
         self.n_allocated_task = len(self.tasks_allocated_to_human)
 
     def find_remained_task(self):
-
         self.remained_tasks = list(set(self.tasks_all) - set(self.finished_tasks))
         self.remained_task_human_only = list(set(self.task_only_human) - set(self.finished_tasks))
         self.remained_task_robot_only = list(set(self.task_only_robot) - set(self.finished_tasks))
