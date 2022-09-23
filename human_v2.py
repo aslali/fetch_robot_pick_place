@@ -2,19 +2,21 @@ import threading
 
 
 class Human(threading.Thread):
-    all_action_type = {1: "human", 2: "robot", 3: "human_cancel", 4: "robot_cancel"}
-    gui_color_code = {1: 'g', 2: 'b', 3: 'o', 4: 'p'}
 
-    def __init__(self, task_to_do):
-        self.all_action_type = {1: "human", 2: "robot", 3: "human_cancel", 4: "robot_cancel"}
+    def __init__(self, task):
+        self.all_action_type = {1: "human", 2: "robot", 3: "human_cancel", 4: "robot_cancel", 5: "return"}
         self.gui_color_code = {1: 'g', 2: 'b', 3: 'o', 4: 'p'}
-        self.task_to_do = task_to_do
+        self.task_to_do = task.task_to_do
+        self.wrong_actions = {"robot": [], "human": [], "return": []}
 
     def get_human_action(self, action):
         action_type = self.get_type(action)
         action_number = self.get_action_number(action)
-        if action_type == self.all_action_type[1] or action_type == self.all_action_type[2]:
-            is_wrong = self.is_correct(action, action_number)
+        if action_type == self.all_action_type[1] or action_type == self.all_action_type[2] or \
+                action_type == self.all_action_type[5]:
+            correct = self.is_correct(action, action_number)
+            if not correct:
+                self.wrong_actions[action_type].append(action_number)
 
     def get_type(self, action):
         return self.all_action_type[int(action[0])]
