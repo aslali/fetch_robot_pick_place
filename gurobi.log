@@ -1,0 +1,12 @@
+
+Gurobi 9.5.0 (linux64, gurobi_cl) logging started Tue Sep 27 11:47:10 2022
+
+Set parameter Username
+Set parameter TimeLimit to value 3
+Set parameter LogFile to value "gurobi.log"
+
+Gurobi 9.5.0 (linux64, gurobi_cl) logging started Tue Sep 27 11:55:51 2022
+
+Set parameter Username
+Set parameter TimeLimit to value 3
+Set parameter LogFile to value "gurobi.log"

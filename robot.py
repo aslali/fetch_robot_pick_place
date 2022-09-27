@@ -42,6 +42,114 @@ class Fetch(threading.Thread):
         # pickplace(robot_control=self.robot_con, pick_col=block_col, blocks=self.blocks, pick_loc=pick_loc,
         #           place_loc=place_loc, place_num=place_num)
 
+    def action_from_schedule(self, timerob, available_actions, precedence, count):
+        act_info = None
+        if available_actions:
+
+            ac = available_actions[0]
+            in_table_zone = False
+            if ac in self.task.remained_tasks:
+                if ac in self.task.human_error_tasks:
+                    if self.task.task_to_do[ac][0] == 'rTray':
+                        dest = self.task.task_to_do[ac][0]
+                        self.task.human_error_tasks_type2.remove(ac)
+                        self.task.available_color_robot_tray[self.task.task_to_do[ac][1]] = []
+                        in_table_zone = True
+                        etype = 'error2'
+                    else:
+                        dest = 'W{}'.format(self.task.task_to_do[ac][0])
+                        self.task.human_error_tasks_type1.remove(ac)
+                        etype = 'error1'
+                    act_info = {'type': etype, 'start': 'T', 'destination': dest,
+                                'destination_num': self.task.task_to_do[ac][1],
+                                'object': self.task.task_to_do[ac][3], 'color': self.task.task_to_do[ac][2],
+                                'correcting_action': self.task.task_to_do[ac][4],
+                                'action_number': self.task.task_to_do[ac][4]}
+                    self.task.finished_tasks.append(ac)
+                    self.task.human_error_tasks.remove(ac)
+                else:
+                    col = self.task.task_to_do[ac][2]
+                    if ac in self.task.tasks_allocated_to_robot:
+                        ds = self.task.task_to_do[ac][1]
+                        ws = self.task.task_to_do[ac][0]
+                        self.task.tasks_allocated_to_robot.remove(ac)
+                        act_info = {'type': 'tray1', 'start': 'T', 'destination': 'W{}'.format(ws),
+                                    'destination_num': ds,
+                                    'object': self.task.available_color_robot_tray[ws], 'action_number': ac,
+                                    'color': col}
+                        self.task.available_color_robot_tray[ws] = []
+                    elif ac in self.task.tasks_allocated_to_human:
+                        ds = self.task.task_to_do[ac][1]
+                        ws = self.task.task_to_do[ac][0]
+                        self.task.tasks_allocated_to_human.remove(ac)
+                        act_info = {'type': 'tray2', 'start': 'T', 'destination': 'W{}'.format(ws),
+                                    'destination_num': ds,
+                                    'object': self.task.available_color_human_tray[ws], 'action_number': ac,
+                                    'color': col}
+                    else:
+                        act_info = {'type': 'normal', 'start': 'T',
+                                    'destination': 'W{}'.format(self.task.task_to_do[ac][0]),
+                                    'destination_num': self.task.task_to_do[ac][1], 'color': col,
+                                    'object': self.task.available_color_table[col][-1], 'action_number': ac}
+                    self.task.finished_tasks.append(ac)
+            else:
+                for i in precedence:
+                    if ac in precedence[i]:
+                        ds = self.task.task_to_do[i][0]
+                        col = self.task.task_to_do[i][2]
+                        self.task.tasks_allocated_to_human.append(i)
+                        self.all_allocated_tasks.append(i)
+                        self.cur_allocated_tasks = self.task.tasks_allocated_to_human[:]
+                        break
+                act_info = {'type': 'allocate', 'start': 'T', 'destination': 'hTray',
+                            'destination_num': ds,
+                            'object': self.task.available_color_table[col][-1], 'color': col, 'action_number': i}
+                self.task.available_color_human_tray[ds] = self.task.available_color_table[col][-1]
+                in_table_zone = True
+
+            # self.task.finished_tasks.append(i)
+            available_actions.pop(0)
+        else:
+            cccccccccccccccccc = 1
+        return act_info, in_table_zone, available_actions
+
+    def robot_action(self, next_action):
+        trd1 = 0
+        trd2 = 0
+        start = next_action['start']
+        destination = next_action['destination']
+        destination_num = next_action['destination_num']
+        object_num = next_action['object']
+
+        if next_action['type'] == 'error1' or next_action['type'] == 'error2':
+            self.human.human_wrong_actions.pop(next_action['correcting_action'])
+            # if next_action['type'] == 'error1':
+            #     trd2 = self.robot_move_apf(start, destination)
+            #
+            # trd1 = self.robot_object_move_apf(start=destination, object_num=object_num, goal=start,
+            #                                   color=next_action['color'])
+            # self.task.available_color_table[next_action['color']].append(object_num)
+            # ll = self.sim_env.table_blocks[next_action['color']]['status']
+            # ito = ll.index(0)
+            # self.sim_env.table_blocks[next_action['color']]['status'][ito] = 1
+        elif next_action['type'] == 'tray1' or next_action['type'] == 'tray2':
+            pass
+            # trd1 = self.robot_object_move_apf(start=start, object_num=object_num, goal=destination,
+            #                                   goal_num=destination_num)
+            # trd2 = self.robot_move_apf(destination, start)
+        else:
+            self.task.available_color_table[next_action['color']].pop()
+            ll = self.sim_env.table_blocks[next_action['color']]['status']
+            ito = len(ll) - 1 - ll[::-1].index(1)
+            self.sim_env.table_blocks[next_action['color']]['status'][ito] = 0
+            # trd1 = self.robot_object_move_apf(start=start, object_num=object_num, goal=destination,
+            #                                   goal_num=destination_num)
+
+            # if next_action['type'] == 'normal':
+            #     trd2 = self.robot_move_apf(destination, start)
+
+        return trd1 + trd2
+
 
     def run(self):
         # self.measure.human_measures(self.measure.init_time, self.p_human_allocation, self.p_human_error)
