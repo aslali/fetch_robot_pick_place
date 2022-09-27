@@ -8,6 +8,8 @@ class Human(threading.Thread):
         self.gui_color_code = {1: 'g', 2: 'b', 3: 'o', 4: 'p'}
         self.task_to_do = task.task_to_do
         self.wrong_actions = {"robot": [], "human": [], "return": []}
+        self.human_wrong_actions = []
+        self.done_tasks = []
 
     def get_human_action(self, action):
         action_type = self.get_type(action)
@@ -17,6 +19,9 @@ class Human(threading.Thread):
             correct = self.is_correct(action, action_number)
             if not correct:
                 self.wrong_actions[action_type].append(action_number)
+                self.human_wrong_actions.append(action_number)
+        self.done_tasks.append(action_number)
+
 
     def get_type(self, action):
         return self.all_action_type[int(action[0])]

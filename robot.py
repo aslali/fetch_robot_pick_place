@@ -112,8 +112,8 @@ class Fetch(threading.Thread):
                                                         action_history=self.human_accuracy_history)
                         self.human_accuracy_history.append(heaction)
 
-                        self.measure.human_dist_error(start_time=start_time_total, pe=self.planner.pbeta,
-                                                      se=self.planner.beta_set)
+                        # self.measure.human_dist_error(start_time=start_time_total, pe=self.planner.pbeta,
+                        #                               se=self.planner.beta_set)
 
                 if human_wrong_actions:
                     seen = set()
@@ -190,7 +190,7 @@ class Fetch(threading.Thread):
                 self.pre_human_tasks_done = self.human.done_tasks[:]
                 self.pre_human_wrong_actions = list(self.human.human_wrong_actions.keys())
                 # start_time_action = self.measure.start_time()
-                # travel_dist = self.robot_action(next_action)
+                travel_dist = self.robot_action(next_action)
                 # self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
                 #                         agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
                 #                         action_number=next_action['action_number'])
