@@ -90,7 +90,7 @@ class Fetch(threading.Thread):
                         act_info = {'type': 'normal', 'start': 'T',
                                     'destination': 'W{}'.format(self.task.task_to_do[ac][0]),
                                     'destination_num': self.task.task_to_do[ac][1], 'color': col,
-                                    'object': self.task.available_color_table[col][-1], 'action_number': ac}
+                                    'action_number': ac}
                     self.task.finished_tasks.append(ac)
             else:
                 for i in precedence:
@@ -103,8 +103,8 @@ class Fetch(threading.Thread):
                         break
                 act_info = {'type': 'allocate', 'start': 'T', 'destination': 'hTray',
                             'destination_num': ds,
-                            'object': self.task.available_color_table[col][-1], 'color': col, 'action_number': i}
-                self.task.available_color_human_tray[ds] = self.task.available_color_table[col][-1]
+                            'color': col, 'action_number': i}
+                # self.task.available_color_human_tray[ds] = self.task.available_color_table[col][-1]
                 in_table_zone = True
 
             # self.task.finished_tasks.append(i)
@@ -119,7 +119,7 @@ class Fetch(threading.Thread):
         start = next_action['start']
         destination = next_action['destination']
         destination_num = next_action['destination_num']
-        object_num = next_action['object']
+        # object_num = next_action['object']
 
         if next_action['type'] == 'error1' or next_action['type'] == 'error2':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
@@ -138,10 +138,11 @@ class Fetch(threading.Thread):
             #                                   goal_num=destination_num)
             # trd2 = self.robot_move_apf(destination, start)
         else:
-            self.task.available_color_table[next_action['color']].pop()
-            ll = self.sim_env.table_blocks[next_action['color']]['status']
-            ito = len(ll) - 1 - ll[::-1].index(1)
-            self.sim_env.table_blocks[next_action['color']]['status'][ito] = 0
+            pass
+            # self.task.available_color_table[next_action['color']].pop()
+            # ll = self.sim_env.table_blocks[next_action['color']]['status']
+            # ito = len(ll) - 1 - ll[::-1].index(1)
+            # self.sim_env.table_blocks[next_action['color']]['status'][ito] = 0
             # trd1 = self.robot_object_move_apf(start=start, object_num=object_num, goal=destination,
             #                                   goal_num=destination_num)
 
