@@ -31,7 +31,7 @@ task = Task(task_only_human=task_only_human, task_only_robot=task_only_robot, ta
 human = human_v2.Human(task=task)
 robot = robot.Fetch(sim_env=sim_env, task=task, human=human)
 
-# robot.start()
-human.start()
+robot.start()
+#human.start()
 
 sim_env.root.mainloop()

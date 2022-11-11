@@ -5,8 +5,8 @@ class Human(threading.Thread):
 
     def __init__(self, task):
         threading.Thread.__init__(self)
-        self.all_action_type = {1: "human", 2: "robot", 3: "human_cancel", 4: "robot_cancel", 5: "return", 6: "done"}
-        self.gui_color_code = {0: 'g', 1: 'b', 2: 'o', 3: 'p'}
+        self.all_box_states = {0: 'Human', 1: 'Assigned_to_Human', 2: 'Assigned_to_Robot', 3: 'Done', 4: 'Return', 5: 'Free'}
+        self.gui_color_code = {0: 'g', 1: 'b', 2: 'o', 3: 'p', 4: 'w'}
         self.task_to_do = task.task_to_do
         self.wrong_actions = {"robot": [], "human": [], "return": []}
         self.human_wrong_actions = {}
@@ -17,30 +17,39 @@ class Human(threading.Thread):
         self.human_server.start()
 
     def get_human_action(self, action):
-        action_type = self.get_type(action)
+        box_state, previous_box_state = self.get_type(action)
         action_number = self.get_action_number(action)
-        if action_type == self.all_action_type[1] or action_type == self.all_action_type[2] or \
-                action_type == self.all_action_type[5]:
-            correct = self.is_correct(action, action_number)
-            if not correct:
-                self.wrong_actions[action_type].append(action_number)
-                # self.human_wrong_actions.append(action_number)
-        self.done_tasks.append(action_number)
+        print(action_number)
+        if box_state == 'Human':
+            print(box_state, previous_box_state)
+        elif box_state == 'Assigned_to_Human':
+            print(box_state, previous_box_state)
+        elif box_state == 'Assigned_to_Robot':
+            print(box_state, previous_box_state)
+            self.is_correct(action)
+        elif box_state =='Done':
+            print(box_state, previous_box_state)
+        elif box_state == 'Return':
+            print(box_state, previous_box_state)
+        elif box_state == 'Free':
+            print(box_state, previous_box_state)
+
+        #self.done_tasks.append(action_number)
 
 
     def get_type(self, action):
-        return self.all_action_type[int(action[0])]
+        return self.all_box_states[int(action[1])], self.all_box_states[int(action[0])]
 
     def is_correct(self, action, action_number):
-        col_code = int(action[3])
+        col_code = int(action[4])
         col = self.gui_color_code[col_code]
         # col = action[3]
         correct_col = self.task_to_do[action_number][2]
         return col == correct_col
 
     def get_action_number(self, action):
-        ws = int(action[1])
-        bn = int(action[2])
+        ws = int(action[2])
+        bn = int(action[3])
         action_number = 5 * (ws - 1) + (bn - 1)
         return action_number
 
