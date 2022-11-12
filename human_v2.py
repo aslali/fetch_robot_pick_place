@@ -5,6 +5,7 @@ class Human(threading.Thread):
 
     def __init__(self, task):
         threading.Thread.__init__(self)
+        self.task = task
         self.all_box_states = {0: 'Human', 1: 'Assigned_to_Human', 2: 'Assigned_to_Robot', 3: 'Done', 4: 'Return', 5: 'Free'}
         self.gui_color_code = {0: 'g', 1: 'b', 2: 'o', 3: 'p', 4: 'w'}
         self.task_to_do = task.task_to_do
@@ -12,22 +13,40 @@ class Human(threading.Thread):
         self.human_wrong_actions = {}
         self.done_tasks = []
         self.human_actions = []
+
+        self.human_current_action = None
+
         self.human_server = server.ServerControl()
         self.human_server.daemon = True
         self.human_server.start()
 
     def get_human_action(self, action):
-        box_state, previous_box_state = self.get_type(action)
+        box_state, previous_box_state, color = self.get_state_color(action)
         action_number = self.get_action_number(action)
         print(action_number)
         if box_state == 'Human':
+            self.human_current_action = action_number
             print(box_state, previous_box_state)
         elif box_state == 'Assigned_to_Human':
+            if previous_box_state == 'Human':
+                self.human_current_action = None
+            else:
+                print('Unknown case 1')
             print(box_state, previous_box_state)
         elif box_state == 'Assigned_to_Robot':
             print(box_state, previous_box_state)
-            self.is_correct(action)
+            if self.is_correct(color=color, action_number=action_number):
+                self.task.tasks_allocated_to_robot.append(action_number)
+            else:
+                pass
         elif box_state =='Done':
+            if action_number in self.task.tasks_allocated_to_human:
+                pass
+            else:
+                if self.is_correct(color=color, action_number=action_number):
+                    pass
+                else:
+                    pass
             print(box_state, previous_box_state)
         elif box_state == 'Return':
             print(box_state, previous_box_state)
@@ -37,15 +56,14 @@ class Human(threading.Thread):
         #self.done_tasks.append(action_number)
 
 
-    def get_type(self, action):
-        return self.all_box_states[int(action[1])], self.all_box_states[int(action[0])]
-
-    def is_correct(self, action, action_number):
+    def get_state_color(self, action):
         col_code = int(action[4])
         col = self.gui_color_code[col_code]
-        # col = action[3]
+        return self.all_box_states[int(action[1])], self.all_box_states[int(action[0])], col
+
+    def is_correct(self, color, action_number):
         correct_col = self.task_to_do[action_number][2]
-        return col == correct_col
+        return color == correct_col
 
     def get_action_number(self, action):
         ws = int(action[2])
