@@ -12,9 +12,12 @@ class Human(threading.Thread):
         self.wrong_actions = {"robot": [], "human": [], "return": []}
         self.human_wrong_actions = {}
         self.done_tasks = []
-        self.human_actions = []
+        # self.human_actions = []
+        self.human_actions_from_allocated = []
 
         self.human_current_action = None
+        self.returning_action = None
+        self.returned_action = None
 
         self.human_server = server.ServerControl()
         self.human_server.daemon = True
@@ -27,30 +30,56 @@ class Human(threading.Thread):
         if box_state == 'Human':
             self.human_current_action = action_number
             print(box_state, previous_box_state)
+
         elif box_state == 'Assigned_to_Human':
             if previous_box_state == 'Human':
                 self.human_current_action = None
             else:
                 print('Unknown case 1')
             print(box_state, previous_box_state)
+
         elif box_state == 'Assigned_to_Robot':
             print(box_state, previous_box_state)
-            if self.is_correct(color=color, action_number=action_number):
+            iscor = self.is_correct(color=color, action_number=action_number)
+            if iscor:
                 self.task.tasks_allocated_to_robot.append(action_number)
+            elif not iscor:
+                self.human_wrong_actions[action_number] = 'assign'
             else:
-                pass
-        elif box_state =='Done':
-            if action_number in self.task.tasks_allocated_to_human:
-                pass
-            else:
+                print('Unknown case 2')
+            self.done_tasks.append(action_number)
+
+        elif box_state == 'Done':
+            if previous_box_state == 'Return':
+                self.returning_action = None
+            elif action_number in self.task.tasks_allocated_to_human:
+                self.task.tasks_allocated_to_human.remove(action_number)
+                self.human_actions_from_allocated.append(action_number)
+                self.done_tasks.append(action_number)
+            elif action_number not in self.task.tasks_allocated_to_human:
                 if self.is_correct(color=color, action_number=action_number):
                     pass
                 else:
-                    pass
+                    self.human_wrong_actions[action_number] = 'place'
+                self.done_tasks.append(action_number)
+            else:
+                print('Unknown case 3')
+
             print(box_state, previous_box_state)
+
         elif box_state == 'Return':
+            self.returning_action = action_number
             print(box_state, previous_box_state)
         elif box_state == 'Free':
+            if previous_box_state == 'Assigned_to_Robot':
+                self.task.tasks_allocated_to_robot.remove(action_number)
+            elif previous_box_state == 'Human':
+                self.human_current_action = None
+            elif previous_box_state == 'Return':
+                self.returning_action = None
+                self.returned_action = action_number
+            else:
+                print('Unknown case 10')
             print(box_state, previous_box_state)
 
         #self.done_tasks.append(action_number)
