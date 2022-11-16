@@ -75,7 +75,7 @@ class Human(threading.Thread):
                 if action_number in self.task.tasks_allocated_to_robot:
                     self.task.tasks_allocated_to_robot.remove(action_number)
                 else:
-                    self.human_wrong_actions.pop(action_number  )
+                    self.human_wrong_actions.pop(action_number)
             elif previous_box_state == 'Human':
                 self.human_current_action = None
             elif previous_box_state == 'Return':
