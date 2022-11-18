@@ -1,11 +1,11 @@
 import threading
-import server
 
 class Human(threading.Thread):
 
-    def __init__(self, task):
+    def __init__(self, task, team_server):
         threading.Thread.__init__(self)
         self.task = task
+        self.team_server = team_server
         self.all_box_states = {0: 'Human', 1: 'Assigned_to_Human', 2: 'Assigned_to_Robot', 3: 'Done', 4: 'Return', 5: 'Free'}
         self.gui_color_code = {0: 'g', 1: 'b', 2: 'o', 3: 'p', 4: 'w'}
         self.task_to_do = task.task_to_do
@@ -14,19 +14,21 @@ class Human(threading.Thread):
         self.done_tasks = []
         # self.human_actions = []
         self.human_actions_from_allocated = []
+        self.action_right_choose = {}
 
         self.human_current_action = None
         self.returning_action = None
         self.returned_action = None
 
-        self.human_server = server.ServerControl()
-        self.human_server.daemon = True
-        self.human_server.start()
+        # self.team_server = server.ServerControl()
+        # self.team_server.daemon = True
+        # self.team_server.start()
 
     def get_human_action(self, action):
         box_state, previous_box_state, color = self.get_state_color(action)
         action_number = self.get_action_number(action)
         print(action_number)
+        self.returned_action = None
         if box_state == 'Human':
             self.human_current_action = action_number
             print(box_state, previous_box_state)
@@ -48,6 +50,7 @@ class Human(threading.Thread):
             else:
                 print('Unknown case 2')
             self.done_tasks.append(action_number)
+            self.action_right_choose[action_number] = 1
 
         elif box_state == 'Done':
             if previous_box_state == 'Return':
@@ -56,12 +59,17 @@ class Human(threading.Thread):
                 self.task.tasks_allocated_to_human.remove(action_number)
                 self.human_actions_from_allocated.append(action_number)
                 self.done_tasks.append(action_number)
+                self.task.finished_tasks.append(action_number)
+                self.action_right_choose[action_number] = 1  # check this
+                self.human_current_action = None
             elif action_number not in self.task.tasks_allocated_to_human:
                 if self.is_correct(color=color, action_number=action_number):
-                    pass
+                    self.task.finished_tasks.append(action_number)
                 else:
                     self.human_wrong_actions[action_number] = 'place'
+                self.human_current_action = None
                 self.done_tasks.append(action_number)
+                self.action_right_choose[action_number] = 1
             else:
                 print('Unknown case 3')
 
@@ -81,6 +89,12 @@ class Human(threading.Thread):
             elif previous_box_state == 'Return':
                 self.returning_action = None
                 self.returned_action = action_number
+                if action_number in self.human_wrong_actions:
+                    self.human_wrong_actions.pop(action_number)
+                else:
+                    self.human_wrong_actions[action_number] = 'return'
+                self.action_right_choose[action_number] = 1
+                self.done_tasks.append(action_number)
             else:
                 print('Unknown case 10')
             print(box_state, previous_box_state)
@@ -108,11 +122,18 @@ class Human(threading.Thread):
         # self.human_action('T', 'W3',2,2)
         first_move = True
 
-        while self.human_server.connected:
-            msg_from_human = self.human_server.get_message()
+        while self.team_server.connected:
+            msg_from_human = self.team_server.get_message()
             if msg_from_human is not None:
                 self.get_human_action(msg_from_human)
-                # self.human_actions.append(msg_from_human)
+                print('wrong actions: ', self.human_wrong_actions)
+                print('done tasks: ', self.done_tasks)
+                print('from allocated: ', self.human_actions_from_allocated)
+                print('right: ', self.action_right_choose)
+
+                print('current: ', self.human_current_action)
+                print('returning: ', self.returning_action)
+                print('returned: ', self.returned_action)
 
 
 

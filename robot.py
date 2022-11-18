@@ -7,7 +7,7 @@ import threading
 
 
 class Fetch(threading.Thread):
-    def __init__(self, sim_env, task, human):
+    def __init__(self, sim_env, task, team_server, human):
         # self.robot_con = RobotControl()
         # self.blocks = tp_blocks.Blocks()
         threading.Thread.__init__(self)
@@ -19,6 +19,7 @@ class Fetch(threading.Thread):
         self.task = task
         self.human = human
         self.sim_env = sim_env
+        self.team_server = team_server
 
         # self.speed = speed
         # self.rob_slopdist = {}
@@ -119,10 +120,15 @@ class Fetch(threading.Thread):
         start = next_action['start']
         destination = next_action['destination']
         destination_num = next_action['destination_num']
+        action_list = {0: 'Robot', 1: 'Done', 2: 'Assigned_to_Human', 3: 'reject', 4:'return', 5:'Human'}
         # object_num = next_action['object']
 
-        if next_action['type'] == 'error1' or next_action['type'] == 'error2':
+        if next_action['type'] == 'Return':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
+            action_type = action_list['return']
+        elif next_action['type'] == 'reject':
+            self.human.human_wrong_actions.pop(next_action['correcting_action'])
+            action_type = action_list['Reject']
             # if next_action['type'] == 'error1':
             #     trd2 = self.robot_move_apf(start, destination)
             #
@@ -132,12 +138,16 @@ class Fetch(threading.Thread):
             # ll = self.sim_env.table_blocks[next_action['color']]['status']
             # ito = ll.index(0)
             # self.sim_env.table_blocks[next_action['color']]['status'][ito] = 1
-        elif next_action['type'] == 'tray1' or next_action['type'] == 'tray2':
+        elif next_action['type'] == 'Assigned_to_Human':
+            action_type = action_list['Assigned_to_Human']
+        elif next_action['type'] == 'Human':
             pass
             # trd1 = self.robot_object_move_apf(start=start, object_num=object_num, goal=destination,
             #                                   goal_num=destination_num)
             # trd2 = self.robot_move_apf(destination, start)
-        else:
+        elif next_action['type'] == 'normal':
+            pass
+        elif next_action['type'] == 'allocate':
             pass
             # self.task.available_color_table[next_action['color']].pop()
             # ll = self.sim_env.table_blocks[next_action['color']]['status']
@@ -149,7 +159,7 @@ class Fetch(threading.Thread):
             # if next_action['type'] == 'normal':
             #     trd2 = self.robot_move_apf(destination, start)
 
-        return trd1 + trd2
+        # return trd1 + trd2
 
 
     def run(self):

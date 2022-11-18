@@ -5,7 +5,7 @@ import time
 class HRInterface:
     def __init__(self):
         self.fetch_server = server.ServerControl()
-        # self.human_server.daemon = True
+        # self.team_server.daemon = True
         self.fetch_server.start()
         # time.sleep(2)
         self.received_msg = None

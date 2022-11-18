@@ -2,6 +2,7 @@ import simulated_environment as se
 import task_state as ts
 import robot
 import human_v2
+import server
 from tasks import Task
 
 human_speed = 10
@@ -28,8 +29,13 @@ sim_env = se.SHSCPackaging(pattern, fast_run=False)
 # task_state = ts.TaskState()
 task = Task(task_only_human=task_only_human, task_only_robot=task_only_robot, task_both=task_both,
             task_to_do=task_to_do, task_precedence_dict=task_precedence_dict, human_speed=human_speed)
-human = human_v2.Human(task=task)
-robot = robot.Fetch(sim_env=sim_env, task=task, human=human)
+
+team_server = server.ServerControl()
+team_server.daemon = True
+team_server.start()
+
+human = human_v2.Human(task=task, team_server=team_server)
+robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server)
 
 #robot.start()
 human.start()
