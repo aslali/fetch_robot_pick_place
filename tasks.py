@@ -123,7 +123,8 @@ class Task:
                 human_error1.pop(0)
                 double_error.remove(ii)
             else:
-                new_task_num = int('{}{}{}'.format(self.n_task_total, self.n_task_total, ii))
+                nt = self.n_task_total % 10
+                new_task_num = int('{}{}'.format(3 * (10**nt), ii))
                 if error_info[ii]['workspace'] == 'rTray':
                     self.task_to_do[new_task_num] = (error_info[ii]['workspace'], error_info[ii]['position_num'],
                                                      error_info[ii]['color'], error_info[ii]['object_num'], ii)
@@ -165,6 +166,7 @@ class Task:
                 human_error1.pop(0)
         self.n_tasks()
         return double_error
+
     def create_new_task(self, new_robot_tasks=[], new_human_tasks=[], human_error=[]):
         # n_new_human = len(new_human_tasks)
         # n_new_robot = len(new_robot_tasks)

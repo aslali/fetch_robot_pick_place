@@ -9,7 +9,7 @@ class Human(threading.Thread):
         self.all_box_states = {0: 'Human', 1: 'Assigned_to_Human', 2: 'Assigned_to_Robot', 3: 'Done', 4: 'Return', 5: 'Free'}
         self.gui_color_code = {0: 'g', 1: 'b', 2: 'o', 3: 'p', 4: 'w'}
         self.task_to_do = task.task_to_do
-        self.wrong_actions = {"robot": [], "human": [], "return": []}
+        self.wrong_actions = {"Robot": [], "Human": [], "Return": []}
         self.human_wrong_actions = {}
         self.done_tasks = []
         # self.human_actions = []
@@ -46,7 +46,7 @@ class Human(threading.Thread):
             if iscor:
                 self.task.tasks_allocated_to_robot.append(action_number)
             elif not iscor:
-                self.human_wrong_actions[action_number] = 'assign'
+                self.human_wrong_actions[action_number] = 'Reject'
             else:
                 print('Unknown case 2')
             self.done_tasks.append(action_number)
@@ -66,7 +66,7 @@ class Human(threading.Thread):
                 if self.is_correct(color=color, action_number=action_number):
                     self.task.finished_tasks.append(action_number)
                 else:
-                    self.human_wrong_actions[action_number] = 'place'
+                    self.human_wrong_actions[action_number] = 'Return'
                 self.human_current_action = None
                 self.done_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1
