@@ -1,4 +1,5 @@
 import threading
+from all_parameters import gui_color_code
 
 class Human(threading.Thread):
 
@@ -7,11 +8,11 @@ class Human(threading.Thread):
         self.task = task
         self.team_server = team_server
         self.all_box_states = {0: 'Human', 1: 'Assigned_to_Human', 2: 'Assigned_to_Robot', 3: 'Done', 4: 'Return', 5: 'Free'}
-        self.gui_color_code = {0: 'g', 1: 'b', 2: 'o', 3: 'p', 4: 'w'}
         self.task_to_do = task.task_to_do
         self.wrong_actions = {"Robot": [], "Human": [], "Return": []}
         self.human_wrong_actions = {}
         self.done_tasks = []
+        self.wrong_action_info = {}
         # self.human_actions = []
         self.human_actions_from_allocated = []
         self.action_right_choose = {}
@@ -26,7 +27,7 @@ class Human(threading.Thread):
 
     def get_human_action(self, action):
         box_state, previous_box_state, color = self.get_state_color(action)
-        action_number = self.get_action_number(action)
+        action_number, workspace, box = self.get_action_number(action)
         print(action_number)
         self.returned_action = None
         if box_state == 'Human':
@@ -47,6 +48,9 @@ class Human(threading.Thread):
                 self.task.tasks_allocated_to_robot.append(action_number)
             elif not iscor:
                 self.human_wrong_actions[action_number] = 'Reject'
+                self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
+                                                       'workspace': act_info['destination'],
+                                                       'box': act_info['destination_num']}
             else:
                 print('Unknown case 2')
             self.done_tasks.append(action_number)
@@ -67,6 +71,9 @@ class Human(threading.Thread):
                     self.task.finished_tasks.append(action_number)
                 else:
                     self.human_wrong_actions[action_number] = 'Return'
+                    self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
+                                                             'workspace': act_info['destination'],
+                                                             'box': act_info['destination_num']}
                 self.human_current_action = None
                 self.done_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1
@@ -92,7 +99,11 @@ class Human(threading.Thread):
                 if action_number in self.human_wrong_actions:
                     self.human_wrong_actions.pop(action_number)
                 else:
-                    self.human_wrong_actions[action_number] = 'return'
+                    self.human_wrong_actions[action_number] = 'Human_Return'
+                    self.wrong_action_info[action_number] = {'type': 'Human_Return', 'color': color,
+                                                             'workspace': act_info['destination'],
+                                                             'box': act_info['destination_num']}
+
                 self.action_right_choose[action_number] = 1
                 self.done_tasks.append(action_number)
             else:
@@ -104,18 +115,18 @@ class Human(threading.Thread):
 
     def get_state_color(self, action):
         col_code = int(action[4])
-        col = self.gui_color_code[col_code]
-        return self.all_box_states[int(action[1])], self.all_box_states[int(action[0])], col
+        color = gui_color_code[col_code]
+        return self.all_box_states[int(action[1])], self.all_box_states[int(action[0])], color
 
     def is_correct(self, color, action_number):
-        correct_col = self.task_to_do[action_number][2]
+        correct_col = self.task_to_do[action_number]['color']
         return color == correct_col
 
     def get_action_number(self, action):
         ws = int(action[2])
         bn = int(action[3])
         action_number = 5 * (ws - 1) + (bn - 1)
-        return action_number
+        return action_number, ws, bn
 
     def run(self):
         # self.human_action('T', 'W4', 4, 10)

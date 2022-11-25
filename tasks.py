@@ -55,7 +55,7 @@ class Task:
     def tasks_required_time(self):
         for t in self.task_to_do:
             task_number = t
-            task_color = self.task_to_do[t][2]
+            task_color = self.task_to_do[t]['color']
             if task_color == 'g':
                 t_robot = 10
                 t_human = param.d_human_close / self.human_speed
@@ -107,7 +107,6 @@ class Task:
     def update_task_human_error(self, human_error, all_human_error, double_error, error_info):
         human_error1 = human_error[:]
         while human_error1:
-            lcheck = False
             tray_error = False
             ii = human_error1[0]
             # de = list(set(all_human_error.keys())-set(human_error))
@@ -123,18 +122,19 @@ class Task:
                 human_error1.pop(0)
                 double_error.remove(ii)
             else:
-                nt = self.n_task_total % 10
+                nt = self.n_task_total // 10
                 new_task_num = int('{}{}'.format(3 * (10**nt), ii))
-                if error_info[ii]['workspace'] == 'rTray':
-                    self.task_to_do[new_task_num] = (error_info[ii]['workspace'], error_info[ii]['position_num'],
-                                                     error_info[ii]['color'], error_info[ii]['object_num'], ii)
+                if error_info[ii]['type'] == 'Reject':
                     tray_error = True
-                    self.human_error_tasks_type2.add(new_task_num)
+                    self.human_error_tasks_reject.add(new_task_num)
                 else:
-                    self.task_to_do[new_task_num] = (int(error_info[ii]['workspace'][1]), error_info[ii]['position_num'],
-                                                     error_info[ii]['color'], error_info[ii]['object_num'], ii)
-                    self.human_error_tasks_type1.add(new_task_num)
+                    # self.task_to_do[new_task_num] = (int(error_info[ii]['workspace'][1]), error_info[ii]['position_num'],
+                    #                                  error_info[ii]['color'], error_info[ii]['object_num'], ii)
+                    self.human_error_tasks_return.add(new_task_num)
 
+                self.task_to_do[new_task_num] = {'workspace': error_info[ii]['workspace'],
+                                                 'box': error_info[ii]['box'],
+                                                 'color': error_info[ii]['color'], 'wrong_task': ii}
                 self.human_error_tasks.add(new_task_num)
 
                 if new_task_num not in self.task_precedence_dict:
@@ -142,12 +142,11 @@ class Task:
                 for i in self.task_precedence_dict[human_error1[0]]:
                     if i in all_human_error:
                         for tt in self.task_to_do:
-                            if len(self.task_to_do[tt]) >= 5 and self.task_to_do[tt][4] == i:
+                            if 'wrong_task' in self.task_to_do[tt] and self.task_to_do[tt]['wrong_task'] == i:
                                 task_num = tt
                         if task_num not in self.task_precedence_dict:
                             self.task_precedence_dict[task_num] = []
                         self.task_precedence_dict[task_num].append(new_task_num)
-                        lcheck = True
                         # human_error1 += [human_error1.pop(0)]
 
                 # if lcheck:

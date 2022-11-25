@@ -3,6 +3,7 @@
 # from fetch_robot import tp_blocks
 import planner
 import threading
+from all_parameters import gui_color_code
 
 
 
@@ -21,6 +22,8 @@ class Fetch(threading.Thread):
         self.sim_env = sim_env
         self.team_server = team_server
 
+        self.action_list = {'Robot': 0, 'Done': 1, 'Assigned_to_Human': 2, 'Assigned_to_Robot': 3, 'Reject': 4,
+                            'Return': 5, 'Human_by_Robot': 6}
         # self.speed = speed
         # self.rob_slopdist = {}
         # self.hum_slopdist = {}
@@ -48,63 +51,53 @@ class Fetch(threading.Thread):
         if available_actions:
             ac = available_actions[0]
             in_table_zone = False
+
             if ac in self.task.remained_tasks:
+                workspace = self.task.task_to_do[ac]['workspace']
+                box = self.task.task_to_do[ac]['box']
+                color = self.task.task_to_do[ac]['color']
                 if ac in self.task.human_error_tasks:
                     if self.task.task_to_do[ac][0] == 'Reject':
-                        workspace = self.task.task_to_do[ac][0]
-                        box = self.task.task_to_do[ac][1]
                         self.task.human_error_tasks_reject.remove(ac)
-                        self.task.available_color_robot_tray[self.task.task_to_do[ac][1]] = []
                         in_table_zone = True
                         etype = 'Reject'
                     else:
-                        workspace = 'W{}'.format(self.task.task_to_do[ac][0])
                         self.task.human_error_tasks_return.remove(ac)
                         etype = 'Return'
                     act_info = {'type': etype, 'workspace': workspace, 'box': box,
-                                'destination_num': self.task.task_to_do[ac][1],
-                                'object': self.task.task_to_do[ac][3], 'color': self.task.task_to_do[ac][2],
-                                'correcting_action': self.task.task_to_do[ac][4],
-                                'action_number': self.task.task_to_do[ac][4]}
+                                 'color': color, 'action_number': ac,
+                                'correcting_action': self.task.task_to_do[ac]['wrong_task']}
                     self.task.finished_tasks.append(ac)
                     self.task.human_error_tasks.remove(ac)
                 else:
-                    col = self.task.task_to_do[ac][2]
-                    workspace = self.task.task_to_do[ac][0]
-                    box = self.task.task_to_do[ac][1]
                     if ac in self.task.tasks_allocated_to_robot:
                         self.task.tasks_allocated_to_robot.remove(ac)
-                        act_info = {'type': 'Robot', 'workspace': workspace, 'box': box,
-                                    'destination_num': ds,
-                                    'object': self.task.available_color_robot_tray[ws], 'action_number': ac,
-                                    'color': col}
-                        # self.task.available_color_robot_tray[ws] = []
+                        act_info = {'type': 'Assigned_to_Robot', 'workspace': workspace, 'box': box,
+                                    'action_number': ac,
+                                    'color': color}
                     elif ac in self.task.tasks_allocated_to_human:
                         self.task.tasks_allocated_to_human.remove(ac)
                         act_info = {'type': 'Human_by_Robot', 'workspace': workspace, 'box': box,
-                                    'destination_num': ds,
-                                    'object': self.task.available_color_human_tray[ws], 'action_number': ac,
-                                    'color': col}
+                                    'action_number': ac,
+                                    'color': color}
                     else:
                         act_info = {'type': 'Robot', 'workspace': workspace,
                                     'box': box,
-                                    'destination_num': self.task.task_to_do[ac][1], 'color': col,
+                                    'color': color,
                                     'action_number': ac}
                     self.task.finished_tasks.append(ac)
             else:
                 for i in precedence:
                     if ac in precedence[i]:
-                        workspace = self.task.task_to_do[i][0]
-                        box = self.task.task_to_do[i][1]
-                        col = self.task.task_to_do[i][2]
                         self.task.tasks_allocated_to_human.append(i)
                         self.all_allocated_tasks.append(i)
                         self.cur_allocated_tasks = self.task.tasks_allocated_to_human[:]
                         break
+                workspace = self.task.task_to_do[i]['workspace']
+                box = self.task.task_to_do[i]['box']
+                color = self.task.task_to_do[i]['color']
                 act_info = {'type': 'Assigned_to_Human', 'workspace': workspace, 'box': box,
-                            'destination_num': ds,
-                            'color': col, 'action_number': i}
-                # self.task.available_color_human_tray[ds] = self.task.available_color_table[col][-1]
+                            'color': color, 'action_number': ac, 'assigning_action': i}
                 in_table_zone = True
 
             # self.task.finished_tasks.append(i)
@@ -116,27 +109,29 @@ class Fetch(threading.Thread):
     def robot_action(self, next_action):
         trd1 = 0
         trd2 = 0
-        start = next_action['start']
-        destination = next_action['destination']
-        destination_num = next_action['destination_num']
-        action_list = {0: 'Robot', 1: 'Done', 2: 'Assigned_to_Human', 3: 'Assigned_to_Robot', 4: 'Reject', 5:'Return',
-                       6:'Human_by_Robot'}
+        ws = next_action['workspace']
+        box = next_action['box']
+        color = next_action['color']
         # object_num = next_action['object']
 
         if next_action['type'] == 'Return':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
-            action_type = action_list['Return']
+            action_type = self.action_list['Return']
         elif next_action['type'] == 'Reject':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
-            action_type = action_list['Reject']
+            action_type = self.action_list['Reject']
         elif next_action['type'] == 'Assigned_to_Human':
-            action_type = action_list['Assigned_to_Human']
+            action_type = self.action_list['Assigned_to_Human']
         elif next_action['type'] == 'Human_by_Robot':
-            action_type = action_list['Human_by_Robot']
+            action_type = self.action_list['Human_by_Robot']
         elif next_action['type'] == 'Robot':
-            action_type = action_list['Robot']
+            action_type = self.action_list['Robot']
         elif next_action['type'] == 'Assigned_to_Robot':
-            action_type = action_list['Assigned_to_Robot']
+            action_type = self.action_list['Assigned_to_Robot']
+
+        msg = str(action_type) + str(ws) + str(box) + str(gui_color_code[color])
+        self.team_server.send_message(msg)
+
 
 
 
@@ -181,7 +176,7 @@ class Fetch(threading.Thread):
             if hum_new_actions:
                 if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot:  # Todo: check why I added self.cur_allocated_task
                     for ts in hum_new_actions:
-                        if self.human.action_right2choose[ts] == 1:
+                        if self.human.action_right_choose[ts] == 1:
                             if ts in self.cur_allocated_tasks:
                                 haction = 1
                             elif ts in self.task.tasks_allocated_to_robot:
@@ -288,6 +283,21 @@ class Fetch(threading.Thread):
                 self.pre_human_wrong_actions = list(self.human.human_wrong_actions.keys())
                 # start_time_action = self.measure.start_time()
                 travel_dist = self.robot_action(next_action)
+
+                send_done_message = False
+                if next_action['type'] == 'Robot':
+                    send_done_message = True
+                elif next_action['type'] == 'Assigned_to_Robot':
+                    send_done_message = True
+                elif next_action['type'] == 'Return':
+                    send_done_message = True
+                elif next_action['type'] == 'Human_by_Robot':
+                    send_done_message = True
+
+                if send_done_message:
+                    msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
+                          + str(gui_color_code[next_action['color']])
+                    self.team_server.send_message(msg)
                 # self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
                 #                         agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
                 #                         action_number=next_action['action_number'])

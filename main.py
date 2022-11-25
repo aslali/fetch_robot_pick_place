@@ -20,7 +20,7 @@ task_precedence_dict = {0: [], 1: [0], 2: [1], 3: [2], 4: [3],
                         15: [], 16: [15], 17: [16], 18: [17], 19: [18]}
 task_to_do = {}
 for j in task_precedence_dict:
-    task_to_do[j] = (j // 5 + 1, j % 5 + 1, pattern[j // 5][j % 5])
+    task_to_do[j] = {'workspace': j // 5 + 1, 'box': j % 5 + 1, 'color': pattern[j // 5][j % 5]}
 task_only_human = []
 task_only_robot = []
 task_both = list(range(20))
@@ -37,7 +37,7 @@ team_server.start()
 human = human_v2.Human(task=task, team_server=team_server)
 robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server)
 
-#robot.start()
+robot.start()
 human.start()
 
 sim_env.root.mainloop()
