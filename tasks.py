@@ -19,8 +19,8 @@ class Task:
         self.n_task_total = None
         self.n_allocated_task = None
         self.human_error_tasks = set()
-        self.human_error_tasks_type1 = set()
-        self.human_error_tasks_type2 = set()
+        self.human_error_tasks_return= set()
+        self.human_error_tasks_reject = set()
         self.n_tasks()
 
         self.task_to_do = task_to_do

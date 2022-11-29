@@ -175,7 +175,7 @@ class Fetch(threading.Thread):
             # hum_new_actions = list(set(self.human.done_tasks) - set(self.pre_human_tasks_done))
             if hum_new_actions:
                 if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot:  # Todo: check why I added self.cur_allocated_task
-                    for ts in hum_new_actions:
+                    for ts in hum_new_actions: #Todo: consider the case that the robot assigns a wrong task
                         if self.human.action_right_choose[ts] == 1:
                             if ts in self.cur_allocated_tasks:
                                 haction = 1

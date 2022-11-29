@@ -16,6 +16,7 @@ class Human(threading.Thread):
         # self.human_actions = []
         self.human_actions_from_allocated = []
         self.action_right_choose = {}
+        self.double_error = []
 
         self.human_current_action = None
         self.returning_action = None
@@ -49,8 +50,8 @@ class Human(threading.Thread):
             elif not iscor:
                 self.human_wrong_actions[action_number] = 'Reject'
                 self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
-                                                       'workspace': act_info['destination'],
-                                                       'box': act_info['destination_num']}
+                                                       'workspace': workspace,
+                                                       'box': box}
             else:
                 print('Unknown case 2')
             self.done_tasks.append(action_number)
@@ -72,8 +73,8 @@ class Human(threading.Thread):
                 else:
                     self.human_wrong_actions[action_number] = 'Return'
                     self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
-                                                             'workspace': act_info['destination'],
-                                                             'box': act_info['destination_num']}
+                                                             'workspace': workspace,
+                                                             'box': box}
                 self.human_current_action = None
                 self.done_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1
@@ -101,8 +102,8 @@ class Human(threading.Thread):
                 else:
                     self.human_wrong_actions[action_number] = 'Human_Return'
                     self.wrong_action_info[action_number] = {'type': 'Human_Return', 'color': color,
-                                                             'workspace': act_info['destination'],
-                                                             'box': act_info['destination_num']}
+                                                             'workspace': workspace,
+                                                             'box': box}
 
                 self.action_right_choose[action_number] = 1
                 self.done_tasks.append(action_number)
