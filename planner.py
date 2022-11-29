@@ -128,7 +128,7 @@ class Planner:
                        save=False):  # todo: add fairness to the cost function
 
         first_step_available_tasks_tray = []
-        tt = list(set(task.remained_tasks) - set(task.human_error_tasks_type2))
+        tt = list(set(task.remained_tasks) - set(task.human_error_tasks_reject))
         for i in task.remained_task_both:
 
             preced_check = any(j in tt for j in task.task_precedence_dict[i])
@@ -201,7 +201,7 @@ class Planner:
                         for i in task.remained_task_both),
                     sense=plp.LpConstraintGE, rhs=0, name="constraint_2"))}
 
-        if not task.human_error_tasks_type1:
+        if not task.human_error_tasks_return:
             if first_step_available_tasks:
                 opt_model += (
                     plp.lpSum(x_vars[i] for i in first_step_available_tasks) <= len(first_step_available_tasks) - 1,

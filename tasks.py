@@ -115,9 +115,9 @@ class Task:
                     if len(self.task_to_do[tt]) > 4 and self.task_to_do[tt][4] == ii:
                         self.task_to_do[tt] = (int(error_info[ii]['workspace'][1]), error_info[ii]['position_num'],
                                                          error_info[ii]['color'], error_info[ii]['object_num'], ii)
-                        self.human_error_tasks_type1.add(tt)
-                        if tt in self.human_error_tasks_type2:
-                            self.human_error_tasks_type2.remove(tt)
+                        self.human_error_tasks_return.add(tt)
+                        if tt in self.human_error_tasks_reject:
+                            self.human_error_tasks_reject.remove(tt)
 
                 human_error1.pop(0)
                 double_error.remove(ii)
@@ -133,8 +133,8 @@ class Task:
                     self.human_error_tasks_return.add(new_task_num)
 
                 self.task_to_do[new_task_num] = {'workspace': error_info[ii]['workspace'],
-                                                 'box': error_info[ii]['box'],
-                                                 'color': error_info[ii]['color'], 'wrong_task': ii}
+                                                 'box': error_info[ii]['box'], 'type': error_info[ii]['type'],
+                                                 'color': 'w', 'wrong_task': ii}
                 self.human_error_tasks.add(new_task_num)
 
                 if new_task_num not in self.task_precedence_dict:

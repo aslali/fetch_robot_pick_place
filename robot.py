@@ -4,6 +4,7 @@
 import planner
 import threading
 from all_parameters import gui_color_code
+import time
 
 
 
@@ -57,7 +58,7 @@ class Fetch(threading.Thread):
                 box = self.task.task_to_do[ac]['box']
                 color = self.task.task_to_do[ac]['color']
                 if ac in self.task.human_error_tasks:
-                    if self.task.task_to_do[ac][0] == 'Reject':
+                    if self.task.task_to_do[ac]['type'] == 'Reject':
                         self.task.human_error_tasks_reject.remove(ac)
                         in_table_zone = True
                         etype = 'Reject'
@@ -261,12 +262,12 @@ class Fetch(threading.Thread):
                                                                                                 precedence_type2=new_pr_type2,
                                                                                                 remaining_tasks=self.task.remained_tasks,
                                                                                                 tasks_human_error=self.task.human_error_tasks,
-                                                                                                tasks_human_error_type1=self.task.human_error_tasks_type1,
-                                                                                                tasks_human_error_type2=self.task.human_error_tasks_type2,
+                                                                                                tasks_human_error_type1=self.task.human_error_tasks_return,
+                                                                                                tasks_human_error_type2=self.task.human_error_tasks_reject,
                                                                                                 )
                     cur_step_actions = [i for i in rtiming if rtiming[i] == 0]
                     t_tray = [i for i in cur_step_actions if i in new_pr_type2]
-                    tray_t = [i for i in cur_step_actions if i in self.task.human_error_tasks_type2]
+                    tray_t = [i for i in cur_step_actions if i in self.task.human_error_tasks_reject]
                     w_tray = list(set(cur_step_actions) - set(tray_t) - set(t_tray))
                     available_actions = tray_t + t_tray + w_tray
                     if not available_actions:
@@ -298,6 +299,7 @@ class Fetch(threading.Thread):
                     msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
                           + str(gui_color_code[next_action['color']])
                     self.team_server.send_message(msg)
+                    time.sleep(5)
                 # self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
                 #                         agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
                 #                         action_number=next_action['action_number'])
