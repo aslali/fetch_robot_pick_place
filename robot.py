@@ -296,7 +296,7 @@ class Fetch(threading.Thread):
                     send_done_message = True
 
                 if send_done_message:
-                    time.sleep(6)
+                    time.sleep(7)
                     msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
                           + str(gui_color_code[next_action['color']])
                     self.team_server.send_message(msg)
