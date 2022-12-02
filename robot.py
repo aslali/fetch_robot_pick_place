@@ -296,10 +296,11 @@ class Fetch(threading.Thread):
                     send_done_message = True
 
                 if send_done_message:
+                    time.sleep(6)
                     msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
                           + str(gui_color_code[next_action['color']])
                     self.team_server.send_message(msg)
-                    time.sleep(5)
+                    time.sleep(10)
                 # self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
                 #                         agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
                 #                         action_number=next_action['action_number'])
