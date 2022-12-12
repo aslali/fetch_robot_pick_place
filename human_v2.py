@@ -16,7 +16,6 @@ class Human(threading.Thread):
         # self.human_actions = []
         self.human_actions_from_allocated = []
         self.action_right_choose = {}
-        self.double_error = []
 
         self.human_current_action = None
         self.returning_action = None
@@ -138,6 +137,8 @@ class Human(threading.Thread):
             msg_from_human = self.team_server.get_message()
             if msg_from_human is not None:
                 self.get_human_action(msg_from_human)
+                self.task.temp_unavailable_task = self.human_current_action
+
                 print('wrong actions: ', self.human_wrong_actions)
                 print('done tasks: ', self.done_tasks)
                 print('from allocated: ', self.human_actions_from_allocated)

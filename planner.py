@@ -128,8 +128,8 @@ class Planner:
                        save=False):  # todo: add fairness to the cost function
 
         first_step_available_tasks_tray = []
-        tt = list(set(task.remained_tasks) - set(task.human_error_tasks_reject))
-        for i in task.remained_task_both:
+        tt = list(set(task.remained_tasks_available_now) - set(task.human_error_tasks_reject))
+        for i in task.remained_task_both_available_now:
 
             preced_check = any(j in tt for j in task.task_precedence_dict[i])
             # wrong_act = i in self.human_wrong_actions
@@ -138,21 +138,21 @@ class Planner:
 
         first_step_available_tasks = list(set(first_step_available_tasks_tray) - set(task.tasks_allocated_to_human))
 
-        nremained = len(task.remained_task_both)
+        # nremained = len(task.remained_task_both_available_now)
         opt_model = plp.LpProblem(name="MIP_Model")
-        x_vars = {i: plp.LpVariable(cat=plp.LpBinary, name="x{0}".format(i)) for i in task.remained_task_both}
+        x_vars = {i: plp.LpVariable(cat=plp.LpBinary, name="x{0}".format(i)) for i in task.remained_task_both_available_now}
         if self.last_selection is not None:
-            for i in task.remained_task_both:
+            for i in task.remained_task_both_available_now:
                 x_vars[i].setInitialValue(self.last_selection["x{0}".format(i)].value())
         z_var = plp.LpVariable('9999', lowBound=0, cat='Continuous')
 
         alloc_task_human = [0] * task.n_task_total
-        for i in task.remained_tasks:
+        for i in task.remained_tasks_available_now:
             if i in task.tasks_allocated_to_human:
                 alloc_task_human[i] = 1
 
         alloc_task_robot = [0] * task.n_task_total
-        for i in task.remained_tasks:
+        for i in task.remained_tasks_available_now:
             if i in task.tasks_allocated_to_robot:
                 alloc_task_robot[i] = 1
 
@@ -162,7 +162,7 @@ class Planner:
         #             e=z_var - plp.lpSum(
         #                 x_vars[i] * (task.t_task_all[i][0] * self.p_human_allocation + hpenalty * (
         #                         1 - self.p_human_allocation) + hpenalty * alloc_task_robot[i])
-        #                 for i in task.remained_task_both),
+        #                 for i in task.remained_task_both_available_now),
         #             sense=plp.LpConstraintGE, rhs=0, name="constraint_1")),
         #     2: opt_model.addConstraint(
         #         plp.LpConstraint(
@@ -170,7 +170,7 @@ class Planner:
         #                 (1 - x_vars[i]) * ((task.t_task_all[i][1] * (1 + self.p_human_allocation * alloc_task_human[i])
         #                                     + self.p_human_error * error_penalty) * 1
         #                                    + rpenalty * (1 - 1))
-        #                 for i in task.remained_task_both),
+        #                 for i in task.remained_task_both_available_now),
         #             sense=plp.LpConstraintGE, rhs=0, name="constraint_2")),
         #     3: opt_model.addConstraint(
         #         plp.LpConstraint(
@@ -190,7 +190,7 @@ class Planner:
             plp.LpConstraint(
                 e=z_var - plp.lpSum(
                     x_vars[i] * (task.t_task_all[i][0])
-                    for i in task.remained_task_both),
+                    for i in task.remained_task_both_available_now),
                 sense=plp.LpConstraintGE, rhs=0, name="constraint_1")),
             2: opt_model.addConstraint(
                 plp.LpConstraint(
@@ -198,7 +198,7 @@ class Planner:
                         (1 - x_vars[i]) * ((task.t_task_all[i][1] * (1 + 1 * alloc_task_human[i])
                                             + 0 * error_penalty) * 1
                                            + rpenalty * (1 - 1))
-                        for i in task.remained_task_both),
+                        for i in task.remained_task_both_available_now),
                     sense=plp.LpConstraintGE, rhs=0, name="constraint_2"))}
 
         if not task.human_error_tasks_return:
@@ -212,10 +212,10 @@ class Planner:
             else:
                 ccccc = 1
         # yprev = [[plp.LpVariable(cat=plp.LpBinary, name='d{sol}_{1}'.format(sol, i)) for i in
-        #        task.remained_task_both] for sol in prev_sol.keys()]
+        #        task.remained_task_both_available_now] for sol in prev_sol.keys()]
 
         # for sol in prev_sol:
-        #     d_vars = {i: plp.LpVariable(cat=plp.LpBinary, name="x{0}".format(i)) for i in task.remained_task_both}
+        #     d_vars = {i: plp.LpVariable(cat=plp.LpBinary, name="x{0}".format(i)) for i in task.remained_task_both_available_now}
 
         objective = z_var
         opt_model.sense = plp.LpMinimize
@@ -231,7 +231,7 @@ class Planner:
 
         new_task_robot = []
         new_task_human = []
-        for i in task.remained_task_both:
+        for i in task.remained_task_both_available_now:
             if varlist['x' + str(i)].value() == 0:
                 new_task_robot.append(i)
             else:

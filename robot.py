@@ -209,17 +209,16 @@ class Fetch(threading.Thread):
                         #                               se=self.planner.beta_set)
 
                 if human_wrong_actions:
-                    seen = set()
-                    dubl = []
-                    for x in human_wrong_actions:
-                        if x in seen:
-                            dubl.append(x)
-                        else:
-                            seen.add(x)
-                    self.human.double_error = list(set(self.human.double_error) - set(dubl))
+                    # seen = set()
+                    # dubl = []
+                    # for x in human_wrong_actions:
+                    #     if x in seen:
+                    #         dubl.append(x)
+                    #     else:
+                    #         seen.add(x)
+                    # self.human.double_error = list(set(self.human.double_error) - set(dubl))
                     human_wrong_actions = list(set(human_wrong_actions))
                     de = self.task.update_task_human_error(human_error=human_wrong_actions,
-                                                           double_error=self.human.double_error,
                                                            all_human_error=self.human.human_wrong_actions,
                                                            error_info=self.human.wrong_action_info)
                     # self.human.double_error = de[:]
@@ -287,20 +286,22 @@ class Fetch(threading.Thread):
 
                 send_done_message = False
                 if next_action['type'] == 'Robot':
+                    time.sleep(30)
                     send_done_message = True
                 elif next_action['type'] == 'Assigned_to_Robot':
+                    time.sleep(30)
                     send_done_message = True
                 elif next_action['type'] == 'Return':
+                    time.sleep(30)
                     send_done_message = True
                 elif next_action['type'] == 'Human_by_Robot':
+                    time.sleep(30)
                     send_done_message = True
 
                 if send_done_message:
-                    time.sleep(7)
                     msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
                           + str(gui_color_code[next_action['color']])
                     self.team_server.send_message(msg)
-                    time.sleep(10)
                 # self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
                 #                         agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
                 #                         action_number=next_action['action_number'])

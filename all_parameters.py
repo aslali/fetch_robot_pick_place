@@ -6,5 +6,5 @@ colors = dict(zip(col2, col1))
 d_human_close = 2 * 10
 d_human_far = 2 * 10 + 2 * 20
 
-t_robot_close = 10
-t_robot_far = 20
+t_robot_close = 5
+t_robot_far = 10
