@@ -156,50 +156,50 @@ class Planner:
             if i in task.tasks_allocated_to_robot:
                 alloc_task_robot[i] = 1
 
-        # constraints = {
-        #     1: opt_model.addConstraint(
-        #         plp.LpConstraint(
-        #             e=z_var - plp.lpSum(
-        #                 x_vars[i] * (task.t_task_all[i][0] * self.p_human_allocation + hpenalty * (
-        #                         1 - self.p_human_allocation) + hpenalty * alloc_task_robot[i])
-        #                 for i in task.remained_task_both_available_now),
-        #             sense=plp.LpConstraintGE, rhs=0, name="constraint_1")),
-        #     2: opt_model.addConstraint(
-        #         plp.LpConstraint(
-        #             e=z_var - plp.lpSum(
-        #                 (1 - x_vars[i]) * ((task.t_task_all[i][1] * (1 + self.p_human_allocation * alloc_task_human[i])
-        #                                     + self.p_human_error * error_penalty) * 1
-        #                                    + rpenalty * (1 - 1))
-        #                 for i in task.remained_task_both_available_now),
-        #             sense=plp.LpConstraintGE, rhs=0, name="constraint_2")),
-        #     3: opt_model.addConstraint(
-        #         plp.LpConstraint(
-        #             e=plp.lpSum((1 - 2 * x_vars[i]) * task.d_task_all[i]) - 4000,
-        #             sense=plp.LpConstraintLE, rhs=0, name="constraint_3"
-        #         )
-        #     ),
-        #     4: opt_model.addConstraint(
-        #         plp.LpConstraint(
-        #                 e=plp.lpSum((1 - 2 * x_vars[i]) * task.d_task_all[i]) + 4000,
-        #                 sense=plp.LpConstraintGE, rhs=0, name="constraint_4"
-        #         )
-        #     ),
-        # }
-
-        constraints = {1: opt_model.addConstraint(
-            plp.LpConstraint(
-                e=z_var - plp.lpSum(
-                    x_vars[i] * (task.t_task_all[i][0])
-                    for i in task.remained_task_both_available_now),
-                sense=plp.LpConstraintGE, rhs=0, name="constraint_1")),
+        constraints = {
+            1: opt_model.addConstraint(
+                plp.LpConstraint(
+                    e=z_var - plp.lpSum(
+                        x_vars[i] * (task.t_task_all[i][0] * self.p_human_allocation + hpenalty * (
+                                1 - self.p_human_allocation) + hpenalty * alloc_task_robot[i])
+                        for i in task.remained_task_both_available_now),
+                    sense=plp.LpConstraintGE, rhs=0, name="constraint_1")),
             2: opt_model.addConstraint(
                 plp.LpConstraint(
                     e=z_var - plp.lpSum(
-                        (1 - x_vars[i]) * ((task.t_task_all[i][1] * (1 + 1 * alloc_task_human[i])
-                                            + 0 * error_penalty) * 1
+                        (1 - x_vars[i]) * ((task.t_task_all[i][1] * (1 + self.p_human_allocation * alloc_task_human[i])
+                                            + self.p_human_error * error_penalty) * 1
                                            + rpenalty * (1 - 1))
                         for i in task.remained_task_both_available_now),
-                    sense=plp.LpConstraintGE, rhs=0, name="constraint_2"))}
+                    sense=plp.LpConstraintGE, rhs=0, name="constraint_2")),
+            # 3: opt_model.addConstraint(
+            #     plp.LpConstraint(
+            #         e=plp.lpSum((1 - 2 * x_vars[i]) * task.d_task_all[i]) - 4000,
+            #         sense=plp.LpConstraintLE, rhs=0, name="constraint_3"
+            #     )
+            # ),
+            # 4: opt_model.addConstraint(
+            #     plp.LpConstraint(
+            #             e=plp.lpSum((1 - 2 * x_vars[i]) * task.d_task_all[i]) + 4000,
+            #             sense=plp.LpConstraintGE, rhs=0, name="constraint_4"
+            #     )
+            # ),
+        }
+
+        # constraints = {1: opt_model.addConstraint(
+        #     plp.LpConstraint(
+        #         e=z_var - plp.lpSum(
+        #             x_vars[i] * (task.t_task_all[i][0])
+        #             for i in task.remained_task_both_available_now),
+        #         sense=plp.LpConstraintGE, rhs=0, name="constraint_1")),
+        #     2: opt_model.addConstraint(
+        #         plp.LpConstraint(
+        #             e=z_var - plp.lpSum(
+        #                 (1 - x_vars[i]) * ((task.t_task_all[i][1] * (1 + 1 * alloc_task_human[i])
+        #                                     + 0 * error_penalty) * 1
+        #                                    + rpenalty * (1 - 1))
+        #                 for i in task.remained_task_both_available_now),
+        #             sense=plp.LpConstraintGE, rhs=0, name="constraint_2"))}
 
         if not task.human_error_tasks_return:
             if first_step_available_tasks:
