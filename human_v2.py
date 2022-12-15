@@ -110,10 +110,11 @@ class Human(threading.Thread):
                             self.task.task_precedence_dict[task_num].append(action_number)
                             break
 
-                    for i in range(1, box):
+                    for i in range(box-1, 0):
                         task_num = (workspace - 1) * 5 + (i - 1)
                         if task_num not in self.task.finished_tasks:
                             self.task.task_precedence_dict[action_number].append(task_num)
+                            break
 
 
                 self.action_right_choose[action_number] = 1
