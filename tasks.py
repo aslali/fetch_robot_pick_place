@@ -20,8 +20,9 @@ class Task:
         self.n_task_total = None
         self.n_allocated_task = None
         self.human_error_tasks = set()
-        self.human_error_tasks_return= set()
+        self.human_error_tasks_return = set()
         self.human_error_tasks_reject = set()
+        self.human_error_tasks_remove = set()
         self.n_tasks()
 
         self.task_to_do = task_to_do
@@ -31,9 +32,6 @@ class Task:
         self.d_task_all = {}
         self.human_speed = human_speed
         self.tasks_required_time()
-
-
-
 
         self.tasks_all = list(range(self.n_task_total))
         self.finished_tasks = []
@@ -75,8 +73,6 @@ class Task:
                 raise Exception('Unknown color')
             self.t_task_all[t] = (t_human, t_robot)
 
-
-
     def n_tasks(self):
         self.n_task_human_only = len(self.task_only_human)
         self.n_task_robot_only = len(self.task_only_robot)
@@ -112,7 +108,7 @@ class Task:
     def update_task_human_error(self, human_error, all_human_error, error_info):
         human_error1 = human_error[:]
         while human_error1:
-            tray_error = False
+            assign_error = False
             ii = human_error1[0]
             # if ii in double_error:
             #     for tt in self.task_to_do:
@@ -126,19 +122,30 @@ class Task:
             #     human_error1.pop(0)
             #     double_error.remove(ii)
             # else:
-            nt = self.n_task_total // 10
-            new_task_num = int('{}{}'.format(3 * (10**nt), ii))
             if error_info[ii]['type'] == 'Reject':
-                tray_error = True
+                assign_error = True
+                nt = self.n_task_total // 10
+                new_task_num = int('{}{}'.format(3 * (10 ** nt), ii))
                 self.human_error_tasks_reject.add(new_task_num)
-            else:
+                col_cor = 'w'
+            elif error_info[ii]['type'] == 'Return':
                 # self.task_to_do[new_task_num] = (int(error_info[ii]['workspace'][1]), error_info[ii]['position_num'],
                 #                                  error_info[ii]['color'], error_info[ii]['object_num'], ii)
+                nt = self.n_task_total // 10
+                new_task_num = int('{}{}'.format(3 * (10 ** nt), ii))
                 self.human_error_tasks_return.add(new_task_num)
+                col_cor = 'w'
+            elif error_info[ii]['type'] == 'Human_Return':
+                new_task_num = ii
+                self.human_error_tasks_remove.add(new_task_num)
+                self.finished_tasks.remove(ii)
+                col_cor = self.task_to_do[new_task_num]['color']
+            else:
+                raise ('Tasks: Unknown human error')
 
             self.task_to_do[new_task_num] = {'workspace': error_info[ii]['workspace'],
                                              'box': error_info[ii]['box'], 'type': error_info[ii]['type'],
-                                             'color': 'w', 'wrong_task': ii}
+                                             'color': col_cor, 'wrong_task': ii}
             self.human_error_tasks.add(new_task_num)
 
             if new_task_num not in self.task_precedence_dict:
@@ -155,7 +162,7 @@ class Task:
             self.task_precedence_dict[human_error1[0]].append(new_task_num)
             self.tasks_all.append(new_task_num)
             self.task_only_robot.append(new_task_num)
-            if tray_error:
+            if assign_error:
                 self.t_task_all[new_task_num] = (-1, 2)
             else:
                 self.t_task_all[new_task_num] = (-1, self.t_task_all[ii][1])
