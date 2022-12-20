@@ -161,6 +161,10 @@ class Fetch(threading.Thread):
         new_human_task = None
         next_robot_turn = False
         isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
+        print(isfinished)
+        print(self.team_server.conn)
+        while self.team_server.conn is None:
+            pass
         while not isfinished:
             # start_time_total = self.measure.start_time()
             self.task.find_remained_task()

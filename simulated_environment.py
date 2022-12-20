@@ -1,6 +1,6 @@
 # import tkinter
 # import tkinter
-import tkinter
+# import tkinter
 from tkinter import *
 import math
 import all_parameters as param
@@ -13,7 +13,7 @@ class SHSCPackaging:
     a = 1
 
     def __init__(self, pattern, fast_run=False):
-        self.root = tkinter.Tk()
+        self.root = Tk()
         self.canvas = None
 
         self.field_width = 1700
@@ -85,7 +85,8 @@ class SHSCPackaging:
         self.root.title('Collaborative Packaging')
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        self.root.geometry(f'{self.field_width}x{self.field_length}')
+        # self.root.geometry(f'{self.field_width}x{self.field_length}')
+        self.root.geometry("{}x{}".format(self.field_width, self.field_length))
         self.root.config(bg='#345')
         self.root.resizable(False, True)
         self.canvas = Canvas(

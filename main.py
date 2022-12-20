@@ -33,11 +33,17 @@ task = Task(task_only_human=task_only_human, task_only_robot=task_only_robot, ta
 team_server = server.ServerControl()
 team_server.daemon = True
 team_server.start()
-
+print('phase1')
 human = human_v2.Human(task=task, team_server=team_server)
+human.daemon = True
+print('phase2')
 robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server)
+robot.daemon = True
+print('phase3')
 
 robot.start()
+print('phase4')
+
 human.start()
 
 sim_env.root.mainloop()

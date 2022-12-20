@@ -20,6 +20,7 @@ class ServerControl(threading.Thread):
         self.server.bind(self.ADDR)
         self.message = None
         self.connected = True
+        self.conn = None
 
     def get_message(self):
         if self.message:
