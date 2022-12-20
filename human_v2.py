@@ -104,6 +104,7 @@ class Human(threading.Thread):
                                                              'workspace': workspace,
                                                              'box': box}
                     self.task.task_precedence_dict[action_number] = []
+                    self.task.finished_tasks.remove[action_number]
                     for i in range(box + 1, 6):
                         task_num = (workspace - 1) * 5 + (i - 1)
                         if task_num not in self.task.finished_tasks:

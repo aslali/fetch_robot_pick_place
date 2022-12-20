@@ -124,11 +124,11 @@ class Task:
             # else:
             if error_info[ii]['type'] == 'Human_Return':
                 self.human_error_tasks_remove.add(ii)
-                self.finished_tasks.remove(ii)
-                self.task_to_do[new_task_num] = {'workspace': error_info[ii]['workspace'],
+                # self.finished_tasks.remove(ii)
+                self.task_to_do[ii] = {'workspace': error_info[ii]['workspace'],
                                                  'box': error_info[ii]['box'], 'type': error_info[ii]['type'],
-                                                 'color': self.task_to_do[new_task_num]['color'], 'wrong_task': ii}
-                self.human_error_tasks.add(new_task_num)
+                                                 'color': self.task_to_do[ii]['color'], 'wrong_task': ii}
+                # self.human_error_tasks.add(ii)
             else:
                 if error_info[ii]['type'] == 'Reject':
                     assign_error = True
