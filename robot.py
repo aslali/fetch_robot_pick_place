@@ -122,12 +122,18 @@ class Fetch(threading.Thread):
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
             action_type = self.action_list['Reject']
         elif next_action['type'] == 'Assigned_to_Human':
+            if next_action['assigning_action'] in self.human.human_wrong_actions:
+                self.human.human_wrong_actions.pop(next_action['assigning_action'])
             action_type = self.action_list['Assigned_to_Human']
         elif next_action['type'] == 'Human_by_Robot':
             action_type = self.action_list['Human_by_Robot']
         elif next_action['type'] == 'Robot':
             action_type = self.action_list['Robot']
+            if next_action['action_number'] in self.human.human_wrong_actions:
+                self.human.human_wrong_actions.pop(next_action['action_number'])
         elif next_action['type'] == 'Assigned_to_Robot':
+            if next_action['action_number'] in self.human.human_wrong_actions:
+                self.human.human_wrong_actions.pop(next_action['action_number'])
             action_type = self.action_list['Assigned_to_Robot']
 
         msg = str(action_type) + str(ws) + str(box) + str(gui_color_code[color])

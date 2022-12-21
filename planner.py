@@ -143,7 +143,8 @@ class Planner:
         x_vars = {i: plp.LpVariable(cat=plp.LpBinary, name="x{0}".format(i)) for i in task.remained_task_both_available_now}
         if self.last_selection is not None:
             for i in task.remained_task_both_available_now:
-                x_vars[i].setInitialValue(self.last_selection["x{0}".format(i)].value())
+                if "x{0}".format(i) in self.last_selection: #todo: when the human returns an object it's not available here
+                    x_vars[i].setInitialValue(self.last_selection["x{0}".format(i)].value())
         z_var = plp.LpVariable('9999', lowBound=0, cat='Continuous')
 
         alloc_task_human = [0] * task.n_task_total
