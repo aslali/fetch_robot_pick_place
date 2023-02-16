@@ -5,6 +5,7 @@ import planner
 import threading
 from all_parameters import gui_color_code
 import time
+import rospy
 
 
 
@@ -12,6 +13,7 @@ class Fetch(threading.Thread):
     def __init__(self, sim_env, task, team_server, human, robot_connected=False):
         self.robot_connected = robot_connected
         if self.robot_connected:
+            rospy.init_node('test_code')
             self.robot_con = RobotControl()
             self.blocks = tp_blocks.Blocks()
         threading.Thread.__init__(self)
@@ -172,7 +174,7 @@ class Fetch(threading.Thread):
         print(isfinished)
         print(self.team_server.conn)
         while self.team_server.conn is None:
-            pass
+            print('waiting')
         while not isfinished:
             # start_time_total = self.measure.start_time()
             self.task.find_remained_task()
@@ -299,7 +301,9 @@ class Fetch(threading.Thread):
                 send_done_message = False
                 if next_action['type'] == 'Robot':
                     if self.robot_connected:
-                        pass
+                        print('hellloooo')
+                        self.action(block_col=next_action['color'], place_num=next_action['box'],
+                                    place_loc=next_action['workspace'])
                     else:
                         time.sleep(30)
                     send_done_message = True
@@ -317,7 +321,8 @@ class Fetch(threading.Thread):
                     send_done_message = True
                 elif next_action['type'] == 'Human_by_Robot':
                     if self.robot_connected:
-                        pass
+                        self.action(block_col=next_action['color'], place_num=next_action['box'],
+                                    place_loc=next_action['workspace'])
                     else:
                         time.sleep(30)
                     send_done_message = True

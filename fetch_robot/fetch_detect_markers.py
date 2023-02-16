@@ -22,7 +22,7 @@ class Fetch_markers(threading.Thread):
                                                          image_size=(1754, 1240),
                                                          marker_side=0.067, marker_separation=0.015,
                                                          padding_size=[0, 5, 0, 0])
-        self.cam_calib = pickle.load(open("calibration_output.pickle", "rb"))
+        self.cam_calib = pickle.load(open("fetch_robot/calibration_output.pickle", "rb"))
         self.aruco_params = cv2.aruco.DetectorParameters_create()
         self.aruco_dict = cv2.aruco.Dictionary_get(ARUCO_DICT["DICT_4X4_100"])
         self.rgb = rgbcamera.RGBCamera()

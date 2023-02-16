@@ -1,23 +1,26 @@
 import time
-from .tp_parameters import PICK_TABLE_POS, PLACE_TABLE_POS, PLACE_IDS
+from .tp_parameters import PICK_TABLE_POS, PLACE_TABLE_POS, PLACE_IDS, BLOCK_LOCATIONS
 import copy
 from math import pi
 import numpy as np
 
-
 YELLOW_HSV = cur_hsv = [0, 0, 100]
 RED_HSV = [0, 100, 80]
 
-def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=None, place_num=None):
+
+def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_num=None, place_num=None):
     # pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance)
     # imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
+    if pick_loc is None:
+        pick_loc = BLOCK_LOCATIONS[pick_col]
+
     p1 = PICK_TABLE_POS[pick_loc]
     if not False:
         print('p1= ', p1)
         robot_control.fetch_base.goto(x=p1[0], y=p1[1], theta=p1[2])
         print('end1')
         # if pick_id < 0:
-        pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance)
+        pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance, p1)
         print(pick_id)
         imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
         if not imd:
@@ -26,7 +29,7 @@ def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=Non
                 ctime = time.time()
                 while time.time() - ctime < 1:
                     if pick_id < 0:
-                        pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance)
+                        pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance, p1)
                     imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
                     if imd:
                         break
@@ -76,11 +79,13 @@ def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=Non
     robot_control.fetch_pick_place.pre_pick_h = 0.4
     robot_control.fetch_pick_place.post_pick_h = 0.15
     robot_control.fetch_pick_place.post_pick_x = 0.35
-    robot_control.fetch_pick_place.pre_pick_pos = [[pos_base[0], pos_base[1], pos_base[2] + 0.20 + 0.1 + 0.05], [0, pi / 2, pi / 2]]
-    robot_control.fetch_pick_place.pick_pos = [[pos_base[0], pos_base[1], pos_base[2] + 0.20 + 0.0 + 0.05], [0, pi / 2, pi / 2]]
-    robot_control.fetch_pick_place.post_pick_pos = [[pos_base[0], pos_base[1], pos_base[2] + 0.20 + 0.1 + 0.05], [0, pi / 2, pi / 2]]
+    robot_control.fetch_pick_place.pre_pick_pos = [[pos_base[0], pos_base[1], pos_base[2] + 0.20 + 0.1 + 0.05],
+                                                   [0, pi / 2, pi / 2]]
+    robot_control.fetch_pick_place.pick_pos = [[pos_base[0], pos_base[1], pos_base[2] + 0.20 + 0.0 + 0.05],
+                                               [0, pi / 2, pi / 2]]
+    robot_control.fetch_pick_place.post_pick_pos = [[pos_base[0], pos_base[1], pos_base[2] + 0.20 + 0.1 + 0.05],
+                                                    [0, pi / 2, pi / 2]]
     robot_control.fetch_pick_place.pick()
-
 
     print('phaaaaasseeee 4')
     safety_light(stat=1)
@@ -95,12 +100,13 @@ def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=Non
         imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(), PLACE_ID[place_num])
 
         if not imdp:
-        ## robot sweeps its head to find the place location
+            ## robot sweeps its head to find the place location
             turns, actual_pose = head_slow_sweep(pi / 4)
             for i in turns:
                 ctime = time.time()
                 while time.time() - ctime < 0.2:
-                    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(), PLACE_ID[place_num])
+                    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(),
+                                                            PLACE_ID[place_num])
                     # print(imdp)
                 if imdp:
                     break
@@ -113,7 +119,8 @@ def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=Non
     p4 = near_table_loc(marker_info=minfop[PLACE_ID[place_num]][1], pick_pos=p3, dxy=0.1)
     print('phase 3')
     robot_control.fetch_base.goto(x=p4[0], y=p4[1], theta=p4[2])
-    dro = d_marker_robot(marker_info=minfop[PLACE_ID[place_num]][1], rob_pos=robot_control.fetch_base.get_pose(), theta=p4[2])
+    dro = d_marker_robot(marker_info=minfop[PLACE_ID[place_num]][1], rob_pos=robot_control.fetch_base.get_pose(),
+                         theta=p4[2])
     if dro > 0.7:
         robot_control.fetch_base.move_forward(distance=dro - 0.7)
 
@@ -126,7 +133,8 @@ def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=Non
     while time.time() - ctime < 6:
         cctime = time.time()
         while time.time() - cctime < 0.5:
-            imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(dtime=3, mode=0), PLACE_ID[place_num])
+            imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(dtime=3, mode=0),
+                                                    PLACE_ID[place_num])
             if imdp:
                 break
         if not imdp:
@@ -148,16 +156,16 @@ def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=Non
     robot_control.fetch_pick_place.pre_place_h = 0.4
     robot_control.fetch_pick_place.pre_place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.2 + 0.05],
                                                     [0, pi / 2, pi / 2]]
-    robot_control.fetch_pick_place.place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.08], [0, pi / 2, pi / 2]]   #+ 0.20 + 0.1
+    robot_control.fetch_pick_place.place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.08],
+                                                [0, pi / 2, pi / 2]]  # + 0.20 + 0.1
     robot_control.fetch_pick_place.post_place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.2 + 0.05],
                                                      [0, pi / 2, pi / 2]]
     robot_control.fetch_pick_place.post_place_h = 0.0
     robot_control.fetch_pick_place.post_place_x = 0.5
     robot_control.fetch_pick_place.place()
     safety_light(stat=0)
-        # print('phase 3')
-        # robot_control.fetch_base.move_backward(distance=0.5)
-
+    # print('phase 3')
+    # robot_control.fetch_base.move_backward(distance=0.5)
 
     if not imdp:
         return False
@@ -166,18 +174,19 @@ def pickplace(robot_control, pick_col, pick_loc, place_loc, blocks, pick_num=Non
 
 
 def safety_light(stat):
-    if stat == 0: # it's safe
+    if stat == 0:  # it's safe
         hsv = YELLOW_HSV
-    if stat == 1: # it's not safe
+    if stat == 1:  # it's not safe
         hsv = RED_HSV
     with open("lamp_stat.txt", "w") as f:
         for s in hsv:
             f.write(str(s) + "\n")
 
+
 def near_table_loc(marker_info, pick_pos, dxy):
-    if pick_pos[2] == pi/2:
+    if pick_pos[2] == pi / 2:
         pnew = [marker_info[0], pick_pos[1] + dxy, pick_pos[2]]
-    elif pick_pos[2] == -pi/2:
+    elif pick_pos[2] == -pi / 2:
         pnew = [marker_info[0], pick_pos[1] - dxy, pick_pos[2]]
     elif pick_pos[2] == 0:
         pnew = [pick_pos[0] + dxy, marker_info[1], pick_pos[2]]
@@ -188,6 +197,7 @@ def near_table_loc(marker_info, pick_pos, dxy):
         return False
     return pnew
 
+
 def d_marker_robot(marker_info, rob_pos, theta):
     if abs(theta) == pi / 2:
         dro = abs(marker_info[1] - rob_pos[1])
@@ -197,6 +207,7 @@ def d_marker_robot(marker_info, rob_pos, theta):
         print("Angle is not defined")
         return False
     return dro
+
 
 def is_marker_detected(detected, wanted):
     detected_ids = []
@@ -237,6 +248,7 @@ if __name__ == '__main__':
     import rospy
     from tp_initialize_robot import RobotControl
     import tp_blocks
+
     rospy.init_node('test_code')
     robot_con = RobotControl()
     block_count = tp_blocks.Blocks()

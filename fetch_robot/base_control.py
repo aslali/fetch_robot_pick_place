@@ -156,8 +156,8 @@ class BaseControl(object):
         move_goal.target_pose.header.stamp = rospy.Time.now()
         self.client.send_goal(move_goal)
         self.client.wait_for_result()
-        if s:
-            s.send(",".join([str(d) for d in list(self.get_pose())]))
+        # if s:
+        #     s.send(",".join([str(d) for d in list(self.get_pose())]))
 
     def goto_relative(self, dx, dy, dtheta, frame="map"):
         move_goal = MoveBaseGoal()
