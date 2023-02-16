@@ -1,6 +1,6 @@
-# from fetch_robot.tp_pick_place import pickplace
-# from fetch_robot.tp_initialize_robot import RobotControl
-# from fetch_robot import tp_blocks
+from fetch_robot.tp_pick_place import pickplace
+from fetch_robot.tp_initialize_robot import RobotControl
+from fetch_robot import tp_blocks
 import planner
 import threading
 from all_parameters import gui_color_code
@@ -9,9 +9,11 @@ import time
 
 
 class Fetch(threading.Thread):
-    def __init__(self, sim_env, task, team_server, human):
-        # self.robot_con = RobotControl()
-        # self.blocks = tp_blocks.Blocks()
+    def __init__(self, sim_env, task, team_server, human, robot_connected=False):
+        self.robot_connected = robot_connected
+        if self.robot_connected:
+            self.robot_con = RobotControl()
+            self.blocks = tp_blocks.Blocks()
         threading.Thread.__init__(self)
         self.p_human_allocation = 0.8
         self.p_human_error = 0.1
@@ -43,9 +45,9 @@ class Fetch(threading.Thread):
         # self.rfast = rfast
 
     def action(self, block_col, pick_loc, place_loc, place_num):
-        pass
-        # pickplace(robot_control=self.robot_con, pick_col=block_col, blocks=self.blocks, pick_loc=pick_loc,
-        #           place_loc=place_loc, place_num=place_num)
+
+        pickplace(robot_control=self.robot_con, pick_col=block_col, blocks=self.blocks, pick_loc=pick_loc,
+                  place_loc=place_loc, place_num=place_num)
 
     def action_from_schedule(self, timerob, available_actions, precedence, count):
         act_info = None
@@ -296,16 +298,28 @@ class Fetch(threading.Thread):
 
                 send_done_message = False
                 if next_action['type'] == 'Robot':
-                    time.sleep(30)
+                    if self.robot_connected:
+                        pass
+                    else:
+                        time.sleep(30)
                     send_done_message = True
                 elif next_action['type'] == 'Assigned_to_Robot':
-                    time.sleep(30)
+                    if self.robot_connected:
+                        pass
+                    else:
+                        time.sleep(30)
                     send_done_message = True
                 elif next_action['type'] == 'Return':
-                    time.sleep(30)
+                    if self.robot_connected:
+                        pass
+                    else:
+                        time.sleep(30)
                     send_done_message = True
                 elif next_action['type'] == 'Human_by_Robot':
-                    time.sleep(30)
+                    if self.robot_connected:
+                        pass
+                    else:
+                        time.sleep(30)
                     send_done_message = True
 
                 if send_done_message:
