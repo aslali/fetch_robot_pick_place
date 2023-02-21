@@ -1,14 +1,15 @@
 import socket
 import threading
 import time
-
+import os
+import subprocess, signal
 
 class ServerControl(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
         self.HEADER = 64
-        self.PORT = 5051
+        self.PORT = 5077
         # self.SERVER = socket.gethostbyname(socket.gethostname())
         # print(self.SERVER)
         self.SERVER = '0.0.0.0'
@@ -31,17 +32,30 @@ class ServerControl(threading.Thread):
             return None
 
     def send_message(self, msg):
-        if msg:
-            self.handle_send(msg)
+        if self.connected:
+            if msg:
+                self.handle_send(msg)
+        else:
+            print('sth happend')
+
+            self.conn.shutdown(socket.SHUT_RDWR)
+            self.conn.close()
+            pid = os.getpid()
+            print(pid)
+            os.kill(pid, signal.SIGKILL)
 
     def server_disconnect(self):
         self.connected = False
+        self.send_message(self.DISCONNECT_MESSAGE)
+        # self.conn.close()
+
 
     def handle_receive(self, conn, addr):
         print("[NEW CONNECTION] {} connected.".format(addr))
         self.connected = True
-        conn.settimeout(10000)
+        conn.settimeout(100000)
         while self.connected:
+            print(self.connected)
             msg_length = conn.recv(self.HEADER).decode(self.FORMAT)
             if msg_length:
                 msg_length = int(msg_length)
@@ -50,8 +64,9 @@ class ServerControl(threading.Thread):
                     self.connected = False
                 self.message = msg
                 # print(self.message)
-
-        conn.close()
+        print('not correct')
+        self.server_disconnect()
+        return 0
 
     def handle_send(self, msg):
         message = msg.encode(self.FORMAT)

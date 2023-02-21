@@ -5,13 +5,14 @@ import human_v2
 import server
 from tasks import Task
 
+
 human_speed = 10
 pattern = [
-    ['o', 'b', 'p', 'p', 'g'],
-    ['g', 'b', 'b', 'g', 'o'],
-    ['b', 'g', 'g', 'o', 'p'],
-    ['b', 'o', 'o', 'p', 'g'],
-    ['p', 'p', 'b', 'g', 'o']
+    ['orange', 'blue', 'pink', 'pink', 'green'],
+    ['green', 'blue', 'blue', 'green', 'orange'],
+    ['blue', 'green', 'green', 'orange', 'pink'],
+    ['blue', 'orange', 'orange', 'pink', 'green'],
+    ['pink', 'pink', 'blue', 'green', 'orange']
 ]
 
 task_precedence_dict = {0: [], 1: [0], 2: [1], 3: [2], 4: [3],

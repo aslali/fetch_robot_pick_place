@@ -57,16 +57,16 @@ class Task:
         for t in self.task_to_do:
             task_number = t
             task_color = self.task_to_do[t]['color']
-            if task_color == 'g':
+            if task_color == 'green':
                 t_robot = 10
                 t_human = param.d_human_close / self.human_speed
-            elif task_color == 'b':
+            elif task_color == 'blue':
                 t_robot = 30
                 t_human = param.d_human_far / self.human_speed
-            elif task_color == 'o':
+            elif task_color == 'orange':
                 t_robot = 30
                 t_human = param.d_human_close / self.human_speed
-            elif task_color == 'p':
+            elif task_color == 'pink':
                 t_robot = 10
                 t_human = param.d_human_far / self.human_speed
             else:

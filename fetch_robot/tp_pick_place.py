@@ -11,6 +11,7 @@ RED_HSV = [0, 100, 80]
 def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_num=None, place_num=None):
     # pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance)
     # imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
+    print(pick_col)
     if pick_loc is None:
         pick_loc = BLOCK_LOCATIONS[pick_col]
 
@@ -20,16 +21,16 @@ def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_nu
         robot_control.fetch_base.goto(x=p1[0], y=p1[1], theta=p1[2])
         print('end1')
         # if pick_id < 0:
-        pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance, p1)
+        pick_id = blocks.color2id(pick_col, robot_control.markers.all_markers_by_distance, p1)
         print(pick_id)
         imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
         if not imd:
-            turns, actual_pose = head_slow_sweep(pi / 6)
+            turns, actual_pose = head_slow_sweep(robot_control, pi / 6)
             for i in turns:
                 ctime = time.time()
                 while time.time() - ctime < 1:
                     if pick_id < 0:
-                        pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance, p1)
+                        pick_id = blocks.color2id(pick_col, robot_control.markers.all_markers_by_distance, p1)
                     imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
                     if imd:
                         break
@@ -101,7 +102,7 @@ def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_nu
 
         if not imdp:
             ## robot sweeps its head to find the place location
-            turns, actual_pose = head_slow_sweep(pi / 4)
+            turns, actual_pose = head_slow_sweep(robot_control, pi / 4)
             for i in turns:
                 ctime = time.time()
                 while time.time() - ctime < 0.2:
@@ -226,7 +227,7 @@ def is_marker_detected(detected, wanted):
     return is_detected, detected_ids, prev_detected
 
 
-def head_slow_sweep(max_turn):
+def head_slow_sweep(robot_con, max_turn):
     max_turn = abs(max_turn)
     actual_pos = robot_con.fetch_head.get_pose()
     cur_pan = actual_pos[0]
