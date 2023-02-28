@@ -146,7 +146,7 @@ class Task:
 
                 self.task_to_do[new_task_num] = {'workspace': error_info[ii]['workspace'],
                                                  'box': error_info[ii]['box'], 'type': error_info[ii]['type'],
-                                                 'color': 'w', 'wrong_task': ii}
+                                                 'color': 'white', 'wrong_task': ii}
                 self.human_error_tasks.add(new_task_num)
 
                 if new_task_num not in self.task_precedence_dict:

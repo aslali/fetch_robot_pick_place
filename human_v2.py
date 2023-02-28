@@ -20,6 +20,7 @@ class Human(threading.Thread):
         self.human_current_action = None
         self.returning_action = None
         self.returned_action = None
+        self.last_action_number = -1
 
         # self.team_server = server.ServerControl()
         # self.team_server.daemon = True
@@ -28,6 +29,7 @@ class Human(threading.Thread):
     def get_human_action(self, action):
         box_state, previous_box_state, color = self.get_state_color(action)
         action_number, workspace, box = self.get_action_number(action)
+        self.last_action_number = action_number
         print(action_number)
         self.returned_action = None
         if box_state == 'Human':
@@ -50,7 +52,8 @@ class Human(threading.Thread):
                 self.human_wrong_actions[action_number] = 'Reject'
                 self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
                                                        'workspace': workspace,
-                                                       'box': box}
+                                                       'box': box, 'id': self.marker_id}
+                print(self.wrong_action_info[action_number])
             else:
                 print('Unknown case 2')
             self.done_tasks.append(action_number)
@@ -73,7 +76,8 @@ class Human(threading.Thread):
                     self.human_wrong_actions[action_number] = 'Return'
                     self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
                                                              'workspace': workspace,
-                                                             'box': box}
+                                                             'box': box, 'id': self.marker_id}
+                    print(self.wrong_action_info[action_number])
                 self.human_current_action = None
                 self.done_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1
@@ -142,6 +146,9 @@ class Human(threading.Thread):
         action_number = 5 * (ws - 1) + (bn - 1)
         return action_number, ws, bn
 
+    def get_marker_number(self, msg):
+            self.marker_id = int(msg[0:])
+
     def run(self):
         # self.human_action('T', 'W4', 4, 10)
         # self.human_action('T', 'W3',2,2)
@@ -150,8 +157,12 @@ class Human(threading.Thread):
         while self.team_server.connected:
             msg_from_human = self.team_server.get_message()
             if msg_from_human is not None:
-                self.get_human_action(msg_from_human)
-                self.task.temp_unavailable_task = self.human_current_action
+                if len(msg_from_human)>3:
+                    self.get_human_action(msg_from_human)
+                    self.task.temp_unavailable_task = self.human_current_action
+                else:
+                    self.get_marker_number(msg_from_human)
+
 
                 print('wrong actions: ', self.human_wrong_actions)
                 print('done tasks: ', self.done_tasks)
