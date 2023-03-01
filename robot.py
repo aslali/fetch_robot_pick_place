@@ -1,11 +1,11 @@
 from fetch_robot.tp_pick_place import pickplace
-# from fetch_robot.tp_initialize_robot import RobotControl
+from fetch_robot.tp_initialize_robot import RobotControl
 from fetch_robot import tp_blocks
 import planner
 import threading
 from all_parameters import gui_color_code
 import time
-# import rospy
+import rospy
 import sys
 
 

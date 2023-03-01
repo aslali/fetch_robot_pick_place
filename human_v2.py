@@ -48,11 +48,12 @@ class Human(threading.Thread):
             iscor = self.is_correct(color=color, action_number=action_number)
             if iscor:
                 self.task.tasks_allocated_to_robot.append(action_number)
+                print(self.task.tasks_allocated_to_robot)
             elif not iscor:
                 self.human_wrong_actions[action_number] = 'Reject'
                 self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
                                                        'workspace': workspace,
-                                                       'box': box, 'id': self.marker_id}
+                                                       'box': box}
                 print(self.wrong_action_info[action_number])
             else:
                 print('Unknown case 2')
