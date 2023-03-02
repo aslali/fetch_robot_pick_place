@@ -8,20 +8,21 @@ YELLOW_HSV = cur_hsv = [0, 0, 100]
 RED_HSV = [0, 100, 80]
 
 
-def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_num=None, place_num=None):
+def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_id=None, pick_col=None, returning=False):
     # pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance)
     # imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
-    print(pick_col)
     if pick_loc is None:
         pick_loc = BLOCK_LOCATIONS[pick_col]
-
     p1 = PICK_TABLE_POS[pick_loc]
+    robot_control.fetch_base.goto(x=p1[0], y=p1[1], theta=p1[2])
+    if returning:
+        safety_light(stat=1)
+    else:
+        safety_light(stat=0)
+
     if not False:
-        print('p1= ', p1)
-        robot_control.fetch_base.goto(x=p1[0], y=p1[1], theta=p1[2])
-        print('end1')
-        # if pick_id < 0:
-        pick_id = blocks.color2id(pick_col, robot_control.markers.all_markers_by_distance, p1)
+        if pick_id is None:
+            pick_id = blocks.color2id(pick_col, robot_control.markers.all_markers_by_distance, p1)
         print(pick_id)
         imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
         if not imd:
@@ -38,42 +39,47 @@ def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_nu
                     robot_control.fetch_head.move_head(i, 0.4)
                     time.sleep(0.1)
 
-    if not imd:
+    if not imd:  # todo: what we can do for this case?
         return False
+
     p2 = near_table_loc(marker_info=minfo[pick_id][1], pick_pos=p1, dxy=0.1)
-    print('p2 = ', p2)
     robot_control.fetch_base.goto(x=p2[0], y=p2[1], theta=p2[2])
-    print('end2')
     dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(), theta=p2[2])
     if dro > 0.7:
-        print('move forward: ', dro)
         robot_control.fetch_base.move_forward(distance=dro - 0.7)
-    print('end3')
     time.sleep(0.5)
     robot_control.fetch_head.look_at(0.7, 0.0, minfo[pick_id][0][2] - 0.3)
     time.sleep(0.5)
 
     ctime = time.time()
     head_move_cnt = 0
-    while time.time() - ctime < 8:
-        cctime = time.time()
-        while time.time() - cctime < 1:
-            print(pick_id)
-            imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=20), pick_id)
-            if imd:
+    while True:
+        while time.time() - ctime < 8:
+            cctime = time.time()
+            while time.time() - cctime < 1:
+                print(pick_id)
+                imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=50), pick_id)
+                print(imd)
+                if imd:
+                    break
+            if not imd:
+                if head_move_cnt % 4 == 0 or head_move_cnt % 4 == 1:
+                    robot_control.fetch_head.move_down(offset=0.15)
+                elif head_move_cnt % 4 == 2 or head_move_cnt % 4 == 3:
+                    robot_control.fetch_head.move_up(offset=0.15)
+                head_move_cnt += 1
+            else:
                 break
+
         if not imd:
-            if head_move_cnt % 4 == 0 or head_move_cnt % 4 == 1:
-                robot_control.fetch_head.move_down(offset=0.15)
-            elif head_move_cnt % 4 == 2 or head_move_cnt % 4 == 3:
-                robot_control.fetch_head.move_up(offset=0.15)
-            head_move_cnt += 1
+            if not returning:
+                pick_id = blocks.color2id(pick_col, robot_control.markers.all_markers_by_time, p2)
+                print("near the table, couldn't find the object")
+            else:
+                print('cannot return')
+                return False
         else:
             break
-
-    if not imd:
-        print("near the table, couldn't find the object")
-        return False
 
     pos_base = minfo[pick_id][0]
     pos_base[0] += 0.04
@@ -89,7 +95,10 @@ def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_nu
     robot_control.fetch_pick_place.pick()
 
     print('phaaaaasseeee 4')
-    safety_light(stat=1)
+    if returning:
+        safety_light(stat=0)
+    else:
+        safety_light(stat=1)
     PLACE_ID = PLACE_IDS[place_loc]
     imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(), PLACE_ID[place_num])
     p3 = PLACE_TABLE_POS[place_loc]
@@ -114,7 +123,7 @@ def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_nu
                 else:
                     robot_control.fetch_head.move_head(i, 0.4)
                     time.sleep(0.1)
-    if not imdp:
+    if not imdp:  # todo: the robot doesn't release the object. this must be fixed
         return False
 
     p4 = near_table_loc(marker_info=minfop[PLACE_ID[place_num]][1], pick_pos=p3, dxy=0.1)
@@ -134,7 +143,7 @@ def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_nu
     while time.time() - ctime < 6:
         cctime = time.time()
         while time.time() - cctime < 0.5:
-            imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(dtime=3, mode=0),
+            imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(dtime=30, mode=0),
                                                     PLACE_ID[place_num])
             if imdp:
                 break
@@ -148,19 +157,28 @@ def pickplace(robot_control, pick_col, place_loc, blocks, pick_loc=None, pick_nu
             break
 
     if not imdp:
-        print("near the table, couldn't find the object")
+        print("near the table, couldn't find the object")  # todo: this has to be fixed for the same reason
         return False
 
     ## robot places the object on the table
     place_pose = minfop[PLACE_ID[place_num]][0]
     place_pose[0] -= 0.02
     robot_control.fetch_pick_place.pre_place_h = 0.4
-    robot_control.fetch_pick_place.pre_place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.2 + 0.05],
-                                                    [0, pi / 2, pi / 2]]
-    robot_control.fetch_pick_place.place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.08],
-                                                [0, pi / 2, pi / 2]]  # + 0.20 + 0.1
-    robot_control.fetch_pick_place.post_place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.2 + 0.05],
-                                                     [0, pi / 2, pi / 2]]
+    if not returning:
+        robot_control.fetch_pick_place.pre_place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.2 + 0.05],
+                                                        [0, pi / 2, pi / 2]]
+        robot_control.fetch_pick_place.place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.08],
+                                                    [0, pi / 2, pi / 2]]  # + 0.20 + 0.1
+        robot_control.fetch_pick_place.post_place_pos = [[place_pose[0], place_pose[1], place_pose[2] + 0.20 + 0.2 + 0.05],
+                                                         [0, pi / 2, pi / 2]]
+    else:
+        robot_control.fetch_pick_place.pre_place_pos = [
+            [place_pose[0]+0.2, place_pose[1] - 0.1, place_pose[2] + 0.25 + 0.1 + 0.05], [0, pi / 2, pi / 2]]
+        robot_control.fetch_pick_place.place_pos = [
+            [place_pose[0]+0.2, place_pose[1] - 0.1, place_pose[2] + 0.25 + 0.1 + 0.05], [0, pi / 2, pi / 2]]
+        robot_control.fetch_pick_place.post_place_pos = [
+            [place_pose[0]+0.2, place_pose[1] - 0.1, place_pose[2] + 0.25 + 0.1 + 0.05], [0, pi / 2, pi / 2]]
+
     robot_control.fetch_pick_place.post_place_h = 0.0
     robot_control.fetch_pick_place.post_place_x = 0.5
     robot_control.fetch_pick_place.place()
@@ -179,7 +197,7 @@ def safety_light(stat):
         hsv = YELLOW_HSV
     if stat == 1:  # it's not safe
         hsv = RED_HSV
-    with open("lamp_stat.txt", "w") as f:
+    with open("fetch_robot/lamp_stat.txt", "w") as f:
         for s in hsv:
             f.write(str(s) + "\n")
 
@@ -255,7 +273,8 @@ if __name__ == '__main__':
     block_count = tp_blocks.Blocks()
 
     # a = pickplace(robot_control=robot_con, pick_col='o', blocks=block_count, pick_loc=1, place_loc=1, place_num=3)
-    a = pickplace(robot_control=robot_con, pick_col='o', blocks=block_count, pick_loc=1, place_loc=1, place_num=5)
+    # a = pickplace(robot_control=robot_con, pick_col='o', blocks=block_count, pick_loc=1, place_loc=1, place_num=5)
+    a = pickplace(robot_control=robot_con, pick_id=86, blocks=block_count, pick_loc=1, place_loc=6, place_num=1, returning=True)
     # a = pickplace(robot_control=robot_con, pick_col='o', pick_loc=1, place_loc=1, place_num=1)
     # a = pickplace(robot_control=robot_con, pick_id=80, pick_loc=1, place_loc=1, place_num=4)
     # a = pickplace(robot_control=robot_con, pick_id=25, pick_loc=4, place_loc=1, place_num=3)

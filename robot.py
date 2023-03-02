@@ -47,9 +47,13 @@ class Fetch(threading.Thread):
         # self.update_sim = not fast_run
         # self.rfast = rfast
 
-    def action(self, block_col, place_loc, place_num, pick_loc=None):
+    def action(self, place_loc, place_num, pick_loc=None, block_col=None, block_id=None):
 
-        pickplace(robot_control=self.robot_con, pick_col=block_col, blocks=self.blocks, pick_loc=pick_loc,
+        if block_id:
+            pickplace(robot_control=self.robot_con, blocks=self.blocks, pick_loc=pick_loc,
+                      place_loc=place_loc, place_num=place_num, pick_id=block_id, returning=True)
+        else:
+            pickplace(robot_control=self.robot_con, pick_col=block_col, blocks=self.blocks, pick_loc=pick_loc,
                   place_loc=place_loc, place_num=place_num)
 
     def action_from_schedule(self, timerob, available_actions, precedence, count):
@@ -67,12 +71,17 @@ class Fetch(threading.Thread):
                         self.task.human_error_tasks_reject.remove(ac)
                         in_table_zone = True
                         etype = 'Reject'
+                        act_info = {'type': etype, 'workspace': workspace, 'box': box,
+                                    'color': color, 'action_number': ac,
+                                    'correcting_action': self.task.task_to_do[ac]['wrong_task']}
                     else:
                         self.task.human_error_tasks_return.remove(ac)
                         etype = 'Return'
-                    act_info = {'type': etype, 'workspace': workspace, 'box': box,
-                                 'color': color, 'action_number': ac,
-                                'correcting_action': self.task.task_to_do[ac]['wrong_task']}
+                        act_info = {'type': etype, 'workspace': workspace, 'box': box,
+                                    'color': color, 'action_number': ac,
+                                    'correcting_action': self.task.task_to_do[ac]['wrong_task'],
+                                    'id': self.task.task_to_do[ac]['id']}
+
                     self.task.finished_tasks.append(ac)
                     self.task.human_error_tasks.remove(ac)
                 else:
@@ -317,7 +326,7 @@ class Fetch(threading.Thread):
                         send_done_message = True
                     elif next_action['type'] == 'Return':
                         if self.robot_connected:
-                            pass
+                            self.action(pick_loc=next_action['workspace']*10 + next_action['workspace'], place_loc=6, place_num=1, block_id=next_action['id'])
                         else:
                             time.sleep(30)
                         send_done_message = True

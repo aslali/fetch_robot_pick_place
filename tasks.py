@@ -141,12 +141,16 @@ class Task:
                     nt = self.n_task_total // 10
                     new_task_num = int('{}{}'.format(3 * (10 ** nt), ii))
                     self.human_error_tasks_return.add(new_task_num)
+                    self.task_to_do[new_task_num] = error_info[ii]['id']
                 else:
                     raise ('Tasks: Unknown human error')
 
                 self.task_to_do[new_task_num] = {'workspace': error_info[ii]['workspace'],
                                                  'box': error_info[ii]['box'], 'type': error_info[ii]['type'],
                                                  'color': 'white', 'wrong_task': ii}
+                if self.task_to_do[new_task_num]['type'] == 'Return':
+                    self.task_to_do[new_task_num]['id'] = error_info[ii]['id']
+
                 self.human_error_tasks.add(new_task_num)
 
                 if new_task_num not in self.task_precedence_dict:
