@@ -50,11 +50,11 @@ class Fetch(threading.Thread):
     def action(self, place_loc, place_num, pick_loc=None, block_col=None, block_id=None):
 
         if block_id:
-            pickplace(robot_control=self.robot_con, blocks=self.blocks, pick_loc=pick_loc,
-                      place_loc=place_loc, place_num=place_num, pick_id=block_id, returning=True)
+            pickplace(robot_control=self.robot_con, place_loc=place_loc, place_num=place_num, blocks=self.blocks,
+                      pick_loc=pick_loc, pick_id=block_id, returning=True, d_thrd_place=0.5)
         else:
-            pickplace(robot_control=self.robot_con, pick_col=block_col, blocks=self.blocks, pick_loc=pick_loc,
-                  place_loc=place_loc, place_num=place_num)
+            pickplace(robot_control=self.robot_con, place_loc=place_loc, place_num=place_num, blocks=self.blocks,
+                      pick_loc=pick_loc, pick_col=block_col)
 
     def action_from_schedule(self, timerob, available_actions, precedence, count):
         act_info = None
@@ -320,7 +320,8 @@ class Fetch(threading.Thread):
                         send_done_message = True
                     elif next_action['type'] == 'Assigned_to_Robot':
                         if self.robot_connected:
-                            pass
+                            self.action(block_col=next_action['color'], place_num=next_action['box'],
+                                        place_loc=next_action['workspace'])
                         else:
                             time.sleep(30)
                         send_done_message = True

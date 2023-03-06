@@ -18,7 +18,8 @@ block_count = Blocks()
 
 # a = pickplace(robot_control=robot_con, pick_col='o', blocks=block_count, pick_loc=1, place_loc=1, place_num=3)
 # a = pickplace(robot_control=robot_con, pick_col='o', blocks=block_count, pick_loc=1, place_loc=1, place_num=5)
-a = pickplace(robot_control=robot_con, pick_id=86, blocks=block_count, pick_loc=11, place_loc=6, place_num=1, returning=False)
+a = pickplace(robot_control=robot_con, place_loc=6, place_num=1, blocks=block_count, pick_loc=11, pick_id=86,
+              returning=False)
 # a = pickplace(robot_control=robot_con, pick_col='o', pick_loc=1, place_loc=1, place_num=1)
 # a = pickplace(robot_control=robot_con, pick_id=80, pick_loc=1, place_loc=1, place_num=4)
 # a = pickplace(robot_control=robot_con, pick_id=25, pick_loc=4, place_loc=1, place_num=3)

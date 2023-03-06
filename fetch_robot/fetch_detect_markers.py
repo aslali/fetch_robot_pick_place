@@ -47,7 +47,7 @@ class Fetch_markers(threading.Thread):
                 # print('tx: {}, ty: {}, tz: {}'.format(t[0, 0], t[0, 1], t[0, 2]))
                 # print('rx: {}, ry: {}, rz: {}'.format(r[0, 0] * 180 / pi, r[0, 1] * 180 / pi, r[0, 2] * 180 / pi))
                 if (time.time() - all_markers_info[mid][2]) < dtime:
-                    markers_info[mid] = [all_markers_info[mid][0], all_markers_info[mid][1]]
+                    markers_info[mid] = [all_markers_info[mid][0], all_markers_info[mid][1], all_markers_info[mid][2], all_markers_info[mid][3]]
         return markers_info
 
     def run(self):
