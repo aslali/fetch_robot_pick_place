@@ -182,12 +182,12 @@ class Fetch(threading.Thread):
             new_human_task = None
             next_robot_turn = False
             isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
-            print(isfinished)
             print(self.team_server.conn)
             while self.team_server.conn is None:
                 print('waiting')
             while not isfinished:
                 # start_time_total = self.measure.start_time()
+                self.team_server.send_message('8000')
                 self.task.find_remained_task()
                 self.task.remove_finished_task_precedence()
 
@@ -308,6 +308,8 @@ class Fetch(threading.Thread):
                     self.pre_human_wrong_actions = list(self.human.human_wrong_actions.keys())
                     # start_time_action = self.measure.start_time()
                     travel_dist = self.robot_action(next_action)
+
+                    self.team_server.send_message('9000')
 
                     send_done_message = False
                     if next_action['type'] == 'Robot':

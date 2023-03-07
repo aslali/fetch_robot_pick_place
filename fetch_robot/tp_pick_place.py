@@ -101,7 +101,7 @@ def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_i
     else:
         safety_light(stat=1)
     PLACE_ID = PLACE_IDS[place_loc]
-    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=1, dtime=30), PLACE_ID[place_num])
+    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=1, dtime=90), PLACE_ID[place_num])
     p3 = PLACE_TABLE_POS[place_loc]
     if not imdp:
         robot_control.fetch_base.goto(x=p3[0], y=p3[1], theta=p3[2])  # x=-2.57
