@@ -1,11 +1,11 @@
-from fetch_robot.tp_pick_place import pickplace
-from fetch_robot.tp_initialize_robot import RobotControl
+# from fetch_robot.tp_pick_place import pickplace
+# from fetch_robot.tp_initialize_robot import RobotControl
 from fetch_robot import tp_blocks
 import planner
 import threading
 from all_parameters import gui_color_code
 import time
-import rospy
+# import rospy
 import sys
 
 
@@ -200,23 +200,6 @@ class Fetch(threading.Thread):
                         hum_new_actions.append(i)
                 # hum_new_actions = list(set(self.human.done_tasks) - set(self.pre_human_tasks_done))
                 if hum_new_actions:
-                    if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot:  # Todo: check why I added self.cur_allocated_task
-                        for ts in hum_new_actions: #Todo: consider the case that the robot assigns a wrong task
-                            if self.human.action_right_choose[ts] == 1:
-                                if ts in self.cur_allocated_tasks:
-                                    haction = 1
-                                elif ts in self.task.tasks_allocated_to_robot:
-                                    haction = -1  # Todo: this reduces p_conform significantly
-                                else:
-                                    haction = 0
-
-                                self.planner.adaptability_update(human_action=haction,
-                                                                 action_history=self.interaction_history)
-                                self.interaction_history.append(haction)
-                                # self.measure.human_dist_follow(start_time=start_time_total, pf=self.planner.palpha,
-                                #                                sf=self.planner.alpha_set)
-                    self.cur_allocated_tasks = self.task.tasks_allocated_to_human[:]
-
                     human_wrong_actions = []
                     for ts in hum_new_actions:
                         if ts in self.human.human_wrong_actions:
@@ -246,6 +229,25 @@ class Fetch(threading.Thread):
                         de = self.task.update_task_human_error(human_error=human_wrong_actions,
                                                                all_human_error=self.human.human_wrong_actions,
                                                                error_info=self.human.wrong_action_info)
+                    wrong_assign = [ii for ii in self.human.human_wrong_actions if self.human.human_wrong_actions[ii] == 'Reject']
+                    if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot or wrong_assign:
+                        for ts in hum_new_actions: #Todo: consider the case that the robot assigns a wrong task
+                            if self.human.action_right_choose[ts] == 1:
+                                if ts in self.cur_allocated_tasks:
+                                    haction = 1
+                                elif ts in self.task.tasks_allocated_to_robot or self.task.human_error_tasks_reject:
+                                    haction = -1  # Todo: this reduces p_conform significantly
+                                else:
+                                    haction = 0
+
+                                self.planner.adaptability_update(human_action=haction,
+                                                                 action_history=self.interaction_history)
+                                self.interaction_history.append(haction)
+                                # self.measure.human_dist_follow(start_time=start_time_total, pf=self.planner.palpha,
+                                #                                sf=self.planner.alpha_set)
+                    self.cur_allocated_tasks = self.task.tasks_allocated_to_human[:]
+
+
                         # self.human.double_error = de[:]
                 # self.measure.human_measures(start_time=start_time_total, p_error=self.planner.p_human_error,
                 #                             p_following=self.planner.p_human_allocation)
@@ -262,10 +264,7 @@ class Fetch(threading.Thread):
                         else:
                             fschedule = self.is_scheduling()
 
-                    # if fselec:
-                    #     new_human_task, new_robot_task = self.planner.task_selection(task=self.task, hpenalty=punish_h,
-                    #                                                                  rpenalty=punish_r,
-                    #                                                                  error_penalty=punish_error)
+
                     if fschedule and not isfinished:
                         is_solution = False
                         while not is_solution:
