@@ -1,11 +1,11 @@
-# from fetch_robot.tp_pick_place import pickplace
-# from fetch_robot.tp_initialize_robot import RobotControl
+from fetch_robot.tp_pick_place import pickplace
+from fetch_robot.tp_initialize_robot import RobotControl
 from fetch_robot import tp_blocks
 import planner
 import threading
 from all_parameters import gui_color_code
 import time
-# import rospy
+import rospy
 import sys
 
 
@@ -18,7 +18,7 @@ class Fetch(threading.Thread):
             self.robot_con = RobotControl()
             self.blocks = tp_blocks.Blocks()
         threading.Thread.__init__(self)
-        self.p_human_allocation = 0.8
+        self.p_human_allocation = 0.7
         self.p_human_error = 0.1
         self.allocation_time_interval = 0
         self.planner = planner.Planner(self.p_human_allocation, self.p_human_error, self.allocation_time_interval)
@@ -40,6 +40,8 @@ class Fetch(threading.Thread):
         self.pre_human_tasks_done = []
         self.pre_human_wrong_actions = []
         self.human_accuracy_history = []
+
+
 
         self.save_init_sol = False
         self.safe_dist_hr = 180
@@ -185,6 +187,9 @@ class Fetch(threading.Thread):
             print(self.team_server.conn)
             while self.team_server.conn is None:
                 print('waiting')
+            while self.human.wait_human:
+                time.sleep(1)
+                print ('waiting for the human')
             while not isfinished:
                 # start_time_total = self.measure.start_time()
                 self.team_server.send_message('8000')
@@ -231,11 +236,11 @@ class Fetch(threading.Thread):
                                                                error_info=self.human.wrong_action_info)
                     wrong_assign = [ii for ii in self.human.human_wrong_actions if self.human.human_wrong_actions[ii] == 'Reject']
                     if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot or wrong_assign:
-                        for ts in hum_new_actions: #Todo: consider the case that the robot assigns a wrong task
+                        for ts in hum_new_actions:
                             if self.human.action_right_choose[ts] == 1:
                                 if ts in self.cur_allocated_tasks:
                                     haction = 1
-                                elif ts in self.task.tasks_allocated_to_robot or self.task.human_error_tasks_reject:
+                                elif ts in self.task.tasks_allocated_to_robot or wrong_assign:
                                     haction = -1  # Todo: this reduces p_conform significantly
                                 else:
                                     haction = 0
@@ -313,7 +318,6 @@ class Fetch(threading.Thread):
                     send_done_message = False
                     if next_action['type'] == 'Robot':
                         if self.robot_connected:
-                            print('hellloooo')
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
@@ -356,7 +360,5 @@ class Fetch(threading.Thread):
         except Exception as ex:
             print(ex)
             self.team_server.server_disconnect()
-            print('join')
-            # for thread in threading.enumerate():
-                # print('an error happened')
+
 

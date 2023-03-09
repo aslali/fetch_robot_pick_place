@@ -22,6 +22,8 @@ class Human(threading.Thread):
         self.returned_action = None
         self.last_action_number = -1
 
+        self.wait_human = True
+
         # self.team_server = server.ServerControl()
         # self.team_server.daemon = True
         # self.team_server.start()
@@ -30,31 +32,26 @@ class Human(threading.Thread):
         box_state, previous_box_state, color = self.get_state_color(action)
         action_number, workspace, box = self.get_action_number(action)
         self.last_action_number = action_number
-        print(action_number)
         self.returned_action = None
         if box_state == 'Human':
             self.human_current_action = action_number
-            print(box_state, previous_box_state)
+            self.wait_human = False
 
         elif box_state == 'Assigned_to_Human':
             if previous_box_state == 'Human':
                 self.human_current_action = None
             else:
                 print('Unknown case 1')
-            print(box_state, previous_box_state)
 
         elif box_state == 'Assigned_to_Robot':
-            print(box_state, previous_box_state)
             iscor = self.is_correct(color=color, action_number=action_number)
             if iscor:
                 self.task.tasks_allocated_to_robot.append(action_number)
-                print(self.task.tasks_allocated_to_robot)
             elif not iscor:
                 self.human_wrong_actions[action_number] = 'Reject'
                 self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
                                                        'workspace': workspace,
                                                        'box': box}
-                print(self.wrong_action_info[action_number])
             else:
                 print('Unknown case 2')
             self.done_tasks.append(action_number)
@@ -78,18 +75,15 @@ class Human(threading.Thread):
                     self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
                                                              'workspace': workspace,
                                                              'box': box, 'id': self.marker_id}
-                    print(self.wrong_action_info[action_number])
                 self.human_current_action = None
                 self.done_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1
             else:
                 print('Unknown case 3')
 
-            print(box_state, previous_box_state)
 
         elif box_state == 'Return':
             self.returning_action = action_number
-            print(box_state, previous_box_state)
         elif box_state == 'Free':
             if previous_box_state == 'Assigned_to_Robot':
                 if action_number in self.task.tasks_allocated_to_robot:
@@ -127,7 +121,6 @@ class Human(threading.Thread):
                 self.done_tasks.append(action_number)
             else:
                 print('Unknown case 10')
-            print(box_state, previous_box_state)
 
         #self.done_tasks.append(action_number)
 

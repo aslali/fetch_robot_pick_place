@@ -6,12 +6,12 @@ import server
 from tasks import Task
 
 
-human_speed = 10
+human_speed = 1
 pattern = [
-    ['orange', 'blue', 'pink', 'pink', 'green'],
-    ['green', 'blue', 'blue', 'green', 'orange'],
-    ['blue', 'green', 'green', 'orange', 'pink'],
-    ['blue', 'orange', 'orange', 'pink', 'green'],
+    ['blue', 'blue', 'blue', 'blue', 'green'],
+    ['green', 'green', 'green', 'green', 'pink'],
+    ['pink', 'pink', 'pink', 'pink', 'orange'],
+    ['orange', 'orange', 'orange', 'orange', 'blue'],
     ['pink', 'pink', 'blue', 'green', 'orange']
 ]
 
@@ -38,7 +38,7 @@ print('phase1')
 human = human_v2.Human(task=task, team_server=team_server)
 # human.daemon = True
 print('phase2')
-robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server, robot_connected=False)
+robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server, robot_connected=True)
 # robot.daemon = True
 print('phase3')
 
