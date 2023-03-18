@@ -35,6 +35,14 @@ class Human(threading.Thread):
         self.returned_action = None
         if box_state == 'Human':
             self.human_current_action = action_number
+            if action_number > 19:
+                self.task.task_precedence_dict[action_number] = []
+                self.task.task_both.append(action_number)
+                self.task.tasks_all.append(action_number)
+                self.task.n_tasks()
+                self.task_to_do[action_number] = {'workspace': workspace, 'box': box, 'color': color}
+                self.task.tasks_required_time(task_num=action_number)
+                self.done_tasks.append(action_number)
             self.wait_human = False
 
         elif box_state == 'Assigned_to_Human':
@@ -52,6 +60,7 @@ class Human(threading.Thread):
                 self.task.n_tasks()
                 self.task_to_do[action_number] ={'workspace': workspace, 'box': box, 'color': color}
                 self.task.tasks_required_time(task_num=action_number)
+                self.action_right_choose[action_number] = 1
             else:
                 iscor = self.is_correct(color=color, action_number=action_number)
                 if iscor:
@@ -63,8 +72,8 @@ class Human(threading.Thread):
                                                            'box': box}
                 else:
                     print('Unknown case 2')
-                self.done_tasks.append(action_number)
-                self.action_right_choose[action_number] = 1
+            self.done_tasks.append(action_number)
+            self.action_right_choose[action_number] = 1
 
         elif box_state == 'Done':
             if previous_box_state == 'Return':
@@ -77,13 +86,16 @@ class Human(threading.Thread):
                 self.action_right_choose[action_number] = 1  # check this
                 self.human_current_action = None
             elif action_number not in self.task.tasks_allocated_to_human:
-                if self.is_correct(color=color, action_number=action_number):
-                    self.task.finished_tasks.append(action_number)
+                if action_number < 20:
+                    if self.is_correct(color=color, action_number=action_number):
+                        self.task.finished_tasks.append(action_number)
+                    else:
+                        self.human_wrong_actions[action_number] = 'Return'
+                        self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
+                                                                 'workspace': workspace,
+                                                                 'box': box, 'id': self.marker_id}
                 else:
-                    self.human_wrong_actions[action_number] = 'Return'
-                    self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
-                                                             'workspace': workspace,
-                                                             'box': box, 'id': self.marker_id}
+                    self.task.finished_tasks.append(action_number)
                 self.human_current_action = None
                 self.done_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1
@@ -106,6 +118,8 @@ class Human(threading.Thread):
                 self.returned_action = action_number
                 if action_number in self.human_wrong_actions:
                     self.human_wrong_actions.pop(action_number)
+                elif action_number > 19:
+                    pass
                 else:
                     self.human_wrong_actions[action_number] = 'Human_Return'
                     self.wrong_action_info[action_number] = {'type': 'Human_Return', 'color': color,
