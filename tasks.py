@@ -43,19 +43,14 @@ class Task:
         self.remained_task_both_available_now = []
         self.find_remained_task()
 
-        # self.available_color_table = {'g': [0, 1, 2, 3, 4, 5, 6], 'y': [7, 8, 9, 10, 11, 12, 13],
-        #                               'b': [14, 15, 16, 17, 18, 19, 20],
-        #                               'r': [21, 22, 23, 24, 25, 26, 27]}
-        # self.available_color_human_tray = {1: [], 2: [], 3: [], 4: []}
-        # self.available_color_robot_tray = {1: [], 2: [], 3: [], 4: []}
 
-    # def all_time(self):
-    #     self.t_hum_all = self.t_both_human + self.t_only_human + [np.NaN] * self.n_task_robot_only
-    #     self.t_rob_all = self.t_both_robot + [np.NaN] * self.n_task_human_only + self.t_only_robot
-    #     self.t_task_all = [self.t_hum_all, self.t_rob_all]
-    def tasks_required_time(self):
-        for t in self.task_to_do:
-            task_number = t
+    def tasks_required_time(self, task_num=None):
+        if task_num is None:
+            task_list = self.task_to_do
+        else:
+            task_list = [task_num]
+
+        for t in task_list:
             task_color = self.task_to_do[t]['color']
             if task_color == 'green':
                 t_robot = param.t_robot_close
@@ -73,6 +68,7 @@ class Task:
                 raise Exception('Unknown color')
             self.t_task_all[t] = (t_human, t_robot)
 
+
     def n_tasks(self):
         self.n_task_human_only = len(self.task_only_human)
         self.n_task_robot_only = len(self.task_only_robot)
@@ -81,11 +77,11 @@ class Task:
         self.n_allocated_task = len(self.tasks_allocated_to_human)
 
     def find_remained_task(self):
-        self.remained_tasks = list(set(self.tasks_all) - set(self.finished_tasks))
+        self.remained_tasks = list((set(self.tasks_all) | set(self.tasks_allocated_to_robot)) - set(self.finished_tasks))
         self.remained_tasks_available_now = list(set(self.remained_tasks) - set([self.temp_unavailable_task]))
         self.remained_task_human_only = list(set(self.task_only_human) - set(self.finished_tasks))
         self.remained_task_robot_only = list(set(self.task_only_robot) - set(self.finished_tasks))
-        self.remained_task_both = list(set(self.task_both) - set(self.finished_tasks))
+        self.remained_task_both = list((set(self.task_both) | set(self.tasks_allocated_to_robot)) - set(self.finished_tasks))
         self.remained_task_both_available_now = list(set(self.remained_task_both) - set([self.temp_unavailable_task]))
 
     def creat_precedence_matrix(self, precedence_dict):
@@ -126,8 +122,8 @@ class Task:
                 self.human_error_tasks_remove.add(ii)
                 # self.finished_tasks.remove(ii)
                 self.task_to_do[ii] = {'workspace': error_info[ii]['workspace'],
-                                                 'box': error_info[ii]['box'], 'type': error_info[ii]['type'],
-                                                 'color': self.task_to_do[ii]['color'], 'wrong_task': ii}
+                                       'box': error_info[ii]['box'], 'type': error_info[ii]['type'],
+                                       'color': self.task_to_do[ii]['color'], 'wrong_task': ii}
                 # self.human_error_tasks.add(ii)
             else:
                 if error_info[ii]['type'] == 'Reject':

@@ -44,18 +44,27 @@ class Human(threading.Thread):
                 print('Unknown case 1')
 
         elif box_state == 'Assigned_to_Robot':
-            iscor = self.is_correct(color=color, action_number=action_number)
-            if iscor:
+            if action_number > 19:
                 self.task.tasks_allocated_to_robot.append(action_number)
-            elif not iscor:
-                self.human_wrong_actions[action_number] = 'Reject'
-                self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
-                                                       'workspace': workspace,
-                                                       'box': box}
+                self.task.task_precedence_dict[action_number] = []
+                self.task.task_both.append(action_number)
+                self.task.tasks_all.append(action_number)
+                self.task.n_tasks()
+                self.task_to_do[action_number] ={'workspace': workspace, 'box': box, 'color': color}
+                self.task.tasks_required_time(task_num=action_number)
             else:
-                print('Unknown case 2')
-            self.done_tasks.append(action_number)
-            self.action_right_choose[action_number] = 1
+                iscor = self.is_correct(color=color, action_number=action_number)
+                if iscor:
+                    self.task.tasks_allocated_to_robot.append(action_number)
+                elif not iscor:
+                    self.human_wrong_actions[action_number] = 'Reject'
+                    self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
+                                                           'workspace': workspace,
+                                                           'box': box}
+                else:
+                    print('Unknown case 2')
+                self.done_tasks.append(action_number)
+                self.action_right_choose[action_number] = 1
 
         elif box_state == 'Done':
             if previous_box_state == 'Return':

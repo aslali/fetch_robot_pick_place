@@ -234,6 +234,7 @@ class Fetch(threading.Thread):
                         de = self.task.update_task_human_error(human_error=human_wrong_actions,
                                                                all_human_error=self.human.human_wrong_actions,
                                                                error_info=self.human.wrong_action_info)
+
                     wrong_assign = [ii for ii in self.human.human_wrong_actions if self.human.human_wrong_actions[ii] == 'Reject']
                     if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot or wrong_assign:
                         for ts in hum_new_actions:
