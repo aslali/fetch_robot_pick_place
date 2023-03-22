@@ -452,7 +452,7 @@ class Planner:
                     # p = max(0.001, (1 - alpha) * (n_not_picked / nhistk))
                     p = max(0.001, (1 - alpha) * (n_not_picked + betaa * n_assign) / denom)
             elif human_action == -1:
-                max(0.001, (1 - alpha) * (n_not_picked + betaa * n_assign) / denom)
+                max(0.001, (1 - alpha) * 0.9)
             else:
                 p = 1
 
