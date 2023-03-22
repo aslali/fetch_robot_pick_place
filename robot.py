@@ -1,17 +1,17 @@
-# from fetch_robot.tp_pick_place import pickplace
-# from fetch_robot.tp_initialize_robot import RobotControl
+from fetch_robot.tp_pick_place import pickplace
+from fetch_robot.tp_initialize_robot import RobotControl
 from fetch_robot import tp_blocks
 import planner
 import threading
 from all_parameters import gui_color_code
 import time
-# import rospy
+import rospy
 import sys
 
 
 
 class Fetch(threading.Thread):
-    def __init__(self, sim_env, task, team_server, human, robot_connected=False):
+    def __init__(self, sim_env, task, team_server, human, measure, robot_connected=False):
         self.robot_connected = robot_connected
         if self.robot_connected:
             rospy.init_node('test_code')
@@ -22,7 +22,6 @@ class Fetch(threading.Thread):
         self.p_human_error = 0.1
         self.allocation_time_interval = 0
         self.planner = planner.Planner(self.p_human_allocation, self.p_human_error, self.allocation_time_interval)
-        # self.time_step = time_step
         self.task = task
         self.human = human
         self.sim_env = sim_env
@@ -30,9 +29,7 @@ class Fetch(threading.Thread):
 
         self.action_list = {'Robot': 0, 'Done': 1, 'Assigned_to_Human': 2, 'Assigned_to_Robot': 3, 'Reject': 4,
                             'Return': 5, 'Human_by_Robot': 6}
-        # self.speed = speed
-        # self.rob_slopdist = {}
-        # self.hum_slopdist = {}
+
 
         self.all_allocated_tasks = []
         self.cur_allocated_tasks = []
@@ -45,9 +42,7 @@ class Fetch(threading.Thread):
 
         self.save_init_sol = False
         self.safe_dist_hr = 180
-        # self.measure = measure
-        # self.update_sim = not fast_run
-        # self.rfast = rfast
+        self.measure = measure
 
     def action(self, place_loc, place_num, pick_loc=None, block_col=None, block_id=None):
 
@@ -124,12 +119,9 @@ class Fetch(threading.Thread):
         return act_info, in_table_zone, available_actions
 
     def robot_action(self, next_action):
-        trd1 = 0
-        trd2 = 0
         ws = next_action['workspace']
         box = next_action['box']
         color = next_action['color']
-        # object_num = next_action['object']
 
         if next_action['type'] == 'Return':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
@@ -160,10 +152,10 @@ class Fetch(threading.Thread):
 
     def run(self):
         # try:
-        # self.measure.human_measures(self.measure.init_time, self.p_human_allocation, self.p_human_error)
-        # self.measure.human_dist_error(self.measure.init_time, self.planner.pbeta, self.planner.beta_set)
-        # self.measure.human_dist_follow(start_time=self.measure.init_time, pf=self.planner.palpha,
-        #                                sf=self.planner.alpha_set)
+        self.measure.human_measures(self.measure.init_time, self.p_human_allocation, self.p_human_error)
+        self.measure.human_dist_error(self.measure.init_time, self.planner.pbeta, self.planner.beta_set)
+        self.measure.human_dist_follow(start_time=self.measure.init_time, pf=self.planner.palpha,
+                                       sf=self.planner.alpha_set)
         htmax = max(v[0] for v in list(self.task.t_task_all.values()))
         rtmax = max(v[1] for v in list(self.task.t_task_all.values()))
         punish_h = 1.5 * (rtmax + htmax)
@@ -191,7 +183,7 @@ class Fetch(threading.Thread):
             time.sleep(1)
             print ('waiting for the human')
         while not isfinished:
-            # start_time_total = self.measure.start_time()
+            start_time_total = self.measure.start_time()
             self.team_server.send_message('8000')
             self.task.find_remained_task()
             self.task.remove_finished_task_precedence()
@@ -203,7 +195,7 @@ class Fetch(threading.Thread):
                     pre_tasks.remove(i)
                 else:
                     hum_new_actions.append(i)
-            # hum_new_actions = list(set(self.human.done_tasks) - set(self.pre_human_tasks_done))
+
             if hum_new_actions:
                 human_wrong_actions = []
                 for ts in hum_new_actions:
@@ -249,14 +241,13 @@ class Fetch(threading.Thread):
                             self.planner.adaptability_update(human_action=haction,
                                                              action_history=self.interaction_history)
                             self.interaction_history.append(haction)
-                            # self.measure.human_dist_follow(start_time=start_time_total, pf=self.planner.palpha,
-                            #                                sf=self.planner.alpha_set)
+                            self.measure.human_dist_follow(start_time=start_time_total, pf=self.planner.palpha,
+                                                           sf=self.planner.alpha_set)
                 self.cur_allocated_tasks = self.task.tasks_allocated_to_human[:]
 
 
-                    # self.human.double_error = de[:]
-            # self.measure.human_measures(start_time=start_time_total, p_error=self.planner.p_human_error,
-            #                             p_following=self.planner.p_human_allocation)
+            self.measure.human_measures(start_time=start_time_total, p_error=self.planner.p_human_error,
+                                        p_following=self.planner.p_human_allocation)
             isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
             if not isfinished:
                 if next_robot_turn:
@@ -311,7 +302,7 @@ class Fetch(threading.Thread):
                                                                                             count=counter)
                 self.pre_human_tasks_done = self.human.done_tasks[:]
                 self.pre_human_wrong_actions = list(self.human.human_wrong_actions.keys())
-                # start_time_action = self.measure.start_time()
+                start_time_action = self.measure.start_time()
                 travel_dist = self.robot_action(next_action)
 
                 self.team_server.send_message('9000')
@@ -349,9 +340,9 @@ class Fetch(threading.Thread):
                     msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
                           + str(gui_color_code[next_action['color']])
                     self.team_server.send_message(msg)
-            # self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
-            #                         agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
-            #                         action_number=next_action['action_number'])
+            self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
+                                    agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
+                                    action_number=next_action['action_number'])
             #
             # aaaaaaa = 1
             # isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0

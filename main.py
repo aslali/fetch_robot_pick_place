@@ -4,6 +4,7 @@ import robot
 import human_v2
 import server
 from tasks import Task
+import measure
 
 
 human_speed = 1
@@ -34,14 +35,17 @@ task = Task(task_only_human=task_only_human, task_only_robot=task_only_robot, ta
 team_server = server.ServerControl()
 team_server.daemon = True
 team_server.start()
+
+measure = measure.Measure(case_name='fair/f5')
 print('phase1')
-human = human_v2.Human(task=task, team_server=team_server)
+human = human_v2.Human(task=task, team_server=team_server, measure=measure)
 # human.daemon = True
 print('phase2')
-robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server, robot_connected=False)
+robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server, measure=measure, robot_connected=False)
 # robot.daemon = True
 print('phase3')
 
+measure.init_time = measure.start_time()
 robot.start()
 print('phase4')
 

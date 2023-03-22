@@ -1,13 +1,15 @@
 import threading
 from all_parameters import gui_color_code
 
+
 class Human(threading.Thread):
 
-    def __init__(self, task, team_server):
+    def __init__(self, task, team_server, measure):
         threading.Thread.__init__(self)
         self.task = task
         self.team_server = team_server
-        self.all_box_states = {0: 'Human', 1: 'Assigned_to_Human', 2: 'Assigned_to_Robot', 3: 'Done', 4: 'Return', 5: 'Free'}
+        self.all_box_states = {0: 'Human', 1: 'Assigned_to_Human', 2: 'Assigned_to_Robot', 3: 'Done', 4: 'Return',
+                               5: 'Free'}
         self.task_to_do = task.task_to_do
         self.wrong_actions = {"Robot": [], "Human": [], "Return": []}
         self.human_wrong_actions = {}
@@ -21,7 +23,7 @@ class Human(threading.Thread):
         self.returning_action = None
         self.returned_action = None
         self.last_action_number = -1
-
+        self.measure = measure
         self.wait_human = True
 
         # self.team_server = server.ServerControl()
@@ -35,14 +37,14 @@ class Human(threading.Thread):
         self.returned_action = None
         if box_state == 'Human':
             self.human_current_action = action_number
-            if action_number > 19:
-                self.task.task_precedence_dict[action_number] = []
-                self.task.task_both.append(action_number)
-                self.task.tasks_all.append(action_number)
-                self.task.n_tasks()
-                self.task_to_do[action_number] = {'workspace': workspace, 'box': box, 'color': color}
-                self.task.tasks_required_time(task_num=action_number)
-                self.done_tasks.append(action_number)
+            # if action_number > 19:
+            #     self.task.task_precedence_dict[action_number] = []
+            #     self.task.task_both.append(action_number)
+            #     self.task.tasks_all.append(action_number)
+            #     self.task.n_tasks()
+            #     self.task_to_do[action_number] = {'workspace': workspace, 'box': box, 'color': color}
+            #     self.task.tasks_required_time(task_num=action_number)
+            #     self.done_tasks.append(action_number)
             self.wait_human = False
 
         elif box_state == 'Assigned_to_Human':
@@ -52,26 +54,26 @@ class Human(threading.Thread):
                 print('Unknown case 1')
 
         elif box_state == 'Assigned_to_Robot':
-            if action_number > 19:
+            # if action_number > 19:
+            #     self.task.tasks_allocated_to_robot.append(action_number)
+            #     self.task.task_precedence_dict[action_number] = []
+            #     self.task.task_both.append(action_number)
+            #     self.task.tasks_all.append(action_number)
+            #     self.task.n_tasks()
+            #     self.task_to_do[action_number] = {'workspace': workspace, 'box': box, 'color': color}
+            #     self.task.tasks_required_time(task_num=action_number)
+            #     self.action_right_choose[action_number] = 1
+            # else:
+            iscor = self.is_correct(color=color, action_number=action_number)
+            if iscor:
                 self.task.tasks_allocated_to_robot.append(action_number)
-                self.task.task_precedence_dict[action_number] = []
-                self.task.task_both.append(action_number)
-                self.task.tasks_all.append(action_number)
-                self.task.n_tasks()
-                self.task_to_do[action_number] ={'workspace': workspace, 'box': box, 'color': color}
-                self.task.tasks_required_time(task_num=action_number)
-                self.action_right_choose[action_number] = 1
+            elif not iscor:
+                self.human_wrong_actions[action_number] = 'Reject'
+                self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
+                                                         'workspace': workspace,
+                                                         'box': box}
             else:
-                iscor = self.is_correct(color=color, action_number=action_number)
-                if iscor:
-                    self.task.tasks_allocated_to_robot.append(action_number)
-                elif not iscor:
-                    self.human_wrong_actions[action_number] = 'Reject'
-                    self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
-                                                           'workspace': workspace,
-                                                           'box': box}
-                else:
-                    print('Unknown case 2')
+                print('Unknown case 2')
             self.done_tasks.append(action_number)
             self.action_right_choose[action_number] = 1
 
@@ -86,16 +88,16 @@ class Human(threading.Thread):
                 self.action_right_choose[action_number] = 1  # check this
                 self.human_current_action = None
             elif action_number not in self.task.tasks_allocated_to_human:
-                if action_number < 20:
-                    if self.is_correct(color=color, action_number=action_number):
-                        self.task.finished_tasks.append(action_number)
-                    else:
-                        self.human_wrong_actions[action_number] = 'Return'
-                        self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
-                                                                 'workspace': workspace,
-                                                                 'box': box, 'id': self.marker_id}
-                else:
+                # if action_number < 20:
+                if self.is_correct(color=color, action_number=action_number):
                     self.task.finished_tasks.append(action_number)
+                else:
+                    self.human_wrong_actions[action_number] = 'Return'
+                    self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
+                                                             'workspace': workspace,
+                                                             'box': box, 'id': self.marker_id}
+                # else:
+                #     self.task.finished_tasks.append(action_number)
                 self.human_current_action = None
                 self.done_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1
@@ -118,8 +120,8 @@ class Human(threading.Thread):
                 self.returned_action = action_number
                 if action_number in self.human_wrong_actions:
                     self.human_wrong_actions.pop(action_number)
-                elif action_number > 19:
-                    pass
+                # elif action_number > 19:
+                #     pass
                 else:
                     self.human_wrong_actions[action_number] = 'Human_Return'
                     self.wrong_action_info[action_number] = {'type': 'Human_Return', 'color': color,
@@ -133,20 +135,18 @@ class Human(threading.Thread):
                             self.task.task_precedence_dict[task_num].append(action_number)
                             break
 
-                    for i in range(box-1, 0):
+                    for i in range(box - 1, 0):
                         task_num = (workspace - 1) * 5 + (i - 1)
                         if task_num not in self.task.finished_tasks:
                             self.task.task_precedence_dict[action_number].append(task_num)
                             break
-
 
                 self.action_right_choose[action_number] = 1
                 self.done_tasks.append(action_number)
             else:
                 print('Unknown case 10')
 
-        #self.done_tasks.append(action_number)
-
+        # self.done_tasks.append(action_number)
 
     def get_state_color(self, action):
         col_code = int(action[4])
@@ -164,7 +164,7 @@ class Human(threading.Thread):
         return action_number, ws, bn
 
     def get_marker_number(self, msg):
-            self.marker_id = int(msg[0:])
+        self.marker_id = int(msg[0:])
 
     def run(self):
         # self.human_action('T', 'W4', 4, 10)
@@ -174,12 +174,16 @@ class Human(threading.Thread):
         while self.team_server.connected:
             msg_from_human = self.team_server.get_message()
             if msg_from_human is not None:
-                if len(msg_from_human)>3:
+                start_time = self.measure.start_time()
+                if len(msg_from_human) > 3:
                     self.get_human_action(msg_from_human)
                     self.task.temp_unavailable_task = self.human_current_action
                 else:
                     self.get_marker_number(msg_from_human)
 
+                # self.measure.action_end(start_time_total=start_time, agent='human', idle_time=idle_time,
+                #                         travel_distance=0, action_type=action['type'],
+                #                         action_number=action['action_number'])
 
                 print('wrong actions: ', self.human_wrong_actions)
                 print('done tasks: ', self.done_tasks)
@@ -189,6 +193,3 @@ class Human(threading.Thread):
                 print('current: ', self.human_current_action)
                 print('returning: ', self.returning_action)
                 print('returned: ', self.returned_action)
-
-
-
