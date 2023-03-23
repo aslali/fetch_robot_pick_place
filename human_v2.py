@@ -24,6 +24,7 @@ class Human(threading.Thread):
         self.returned_action = None
         self.last_action_number = -1
         self.measure = measure
+        self.save_action = None
         self.wait_human = True
 
         # self.team_server = server.ServerControl()
@@ -67,11 +68,13 @@ class Human(threading.Thread):
             iscor = self.is_correct(color=color, action_number=action_number)
             if iscor:
                 self.task.tasks_allocated_to_robot.append(action_number)
+                self.save_action = 'Assigned_to_Robot'
             elif not iscor:
                 self.human_wrong_actions[action_number] = 'Reject'
                 self.wrong_action_info[action_number] = {'type': 'Reject', 'color': color,
                                                          'workspace': workspace,
                                                          'box': box}
+                self.save_action = 'Reject'
             else:
                 print('Unknown case 2')
             self.done_tasks.append(action_number)
@@ -87,15 +90,18 @@ class Human(threading.Thread):
                 self.task.finished_tasks.append(action_number)
                 self.action_right_choose[action_number] = 1  # check this
                 self.human_current_action = None
+                self.save_action = 'Assigned_to_Human'
             elif action_number not in self.task.tasks_allocated_to_human:
                 # if action_number < 20:
                 if self.is_correct(color=color, action_number=action_number):
                     self.task.finished_tasks.append(action_number)
+                    self.save_action = 'Human'
                 else:
                     self.human_wrong_actions[action_number] = 'Return'
                     self.wrong_action_info[action_number] = {'type': 'Return', 'color': color,
                                                              'workspace': workspace,
                                                              'box': box, 'id': self.marker_id}
+                    self.save_action = 'Return'
                 # else:
                 #     self.task.finished_tasks.append(action_number)
                 self.human_current_action = None
@@ -111,8 +117,10 @@ class Human(threading.Thread):
             if previous_box_state == 'Assigned_to_Robot':
                 if action_number in self.task.tasks_allocated_to_robot:
                     self.task.tasks_allocated_to_robot.remove(action_number)
+                    self.save_action = "Cancel_Assign"
                 else:
-                    self.human_wrong_actions.pop(action_number)
+                    self.human_wrong_actions.pop(action_number) #todo: how to consider this case?
+                    self.save_action = "Cancel_Wrong_Assign"
             elif previous_box_state == 'Human':
                 self.human_current_action = None
             elif previous_box_state == 'Return':
@@ -122,6 +130,7 @@ class Human(threading.Thread):
                     self.human_wrong_actions.pop(action_number)
                 # elif action_number > 19:
                 #     pass
+                    self.save_action = 'Correct_Return'
                 else:
                     self.human_wrong_actions[action_number] = 'Human_Return'
                     self.wrong_action_info[action_number] = {'type': 'Human_Return', 'color': color,
@@ -140,6 +149,8 @@ class Human(threading.Thread):
                         if task_num not in self.task.finished_tasks:
                             self.task.task_precedence_dict[action_number].append(task_num)
                             break
+
+                    self.save_action = 'Wrong_Return'
 
                 self.action_right_choose[action_number] = 1
                 self.done_tasks.append(action_number)
@@ -180,10 +191,11 @@ class Human(threading.Thread):
                     self.task.temp_unavailable_task = self.human_current_action
                 else:
                     self.get_marker_number(msg_from_human)
-
-                # self.measure.action_end(start_time_total=start_time, agent='human', idle_time=idle_time,
-                #                         travel_distance=0, action_type=action['type'],
-                #                         action_number=action['action_number'])
+                if self.save_action is not None:
+                    self.measure.action_end(start_time_total=0, agent='human',
+                                            travel_distance=0, action_type=self.save_action,
+                                            action_number=1)
+                self.save_action = None
 
                 print('wrong actions: ', self.human_wrong_actions)
                 print('done tasks: ', self.done_tasks)

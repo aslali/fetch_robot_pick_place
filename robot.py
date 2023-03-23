@@ -313,27 +313,27 @@ class Fetch(threading.Thread):
                         self.action(block_col=next_action['color'], place_num=next_action['box'],
                                     place_loc=next_action['workspace'])
                     else:
-                        time.sleep(30)
+                        time.sleep(1)
                     send_done_message = True
                 elif next_action['type'] == 'Assigned_to_Robot':
                     if self.robot_connected:
                         self.action(block_col=next_action['color'], place_num=next_action['box'],
                                     place_loc=next_action['workspace'])
                     else:
-                        time.sleep(30)
+                        time.sleep(1)
                     send_done_message = True
                 elif next_action['type'] == 'Return':
                     if self.robot_connected:
                         self.action(pick_loc=next_action['workspace']*10 + next_action['workspace'], place_loc=6, place_num=1, block_id=next_action['id'])
                     else:
-                        time.sleep(30)
+                        time.sleep(1)
                     send_done_message = True
                 elif next_action['type'] == 'Human_by_Robot':
                     if self.robot_connected:
                         self.action(block_col=next_action['color'], place_num=next_action['box'],
                                     place_loc=next_action['workspace'])
                     else:
-                        time.sleep(30)
+                        time.sleep(1)
                     send_done_message = True
 
                 if send_done_message:
@@ -345,9 +345,9 @@ class Fetch(threading.Thread):
                                     action_number=next_action['action_number'])
             #
             # aaaaaaa = 1
-            # isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
+            isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
 
-        # self.measure.run_all()
+        self.measure.run_all()
 
         # except Exception as ex:
         #     print(ex)

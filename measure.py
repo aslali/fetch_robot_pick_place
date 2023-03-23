@@ -36,7 +36,7 @@ class Measure:
         tic = time.clock()
         return tic
 
-    def action_end(self, start_time_total, agent, start_time_action=None, idle_time=None, travel_distance=None,
+    def action_end(self, start_time_total, agent, start_time_action=None, travel_distance=0,
                    action_type=None, action_number=None):
         toc = time.clock()
         if agent == 'human':
@@ -56,40 +56,37 @@ class Measure:
             self.robot_travel_distance.append(travel_distance)
 
     def creat_table(self):
-        wrong = [x[3] for x in self.action_times_human if (x[3] == 'error1' or x[3] == 'error2')]
-        rwrong = [x[4] for x in self.action_times_robot if (x[5] == 'error1' or x[5] == 'error2')]
-        self.twrong = sum(rwrong)
+        wrong = [x[2] for x in self.action_times_human if (x[2] == 'Wrong_Return' or x[2] == 'Reject' or x[2] == 'Return')]
+        wrong_corrected = [x[2] for x in self.action_times_human if (x[2] == 'Correct_Return' or x[2] == 'Cancel_Wrong_Assign')]
         self.nwrong = len(wrong)
         print('n wrong actions: ', self.nwrong)
-        print('t wrong actions: ', self.twrong)
+        hassign = [x[2] for x in self.action_times_human if x[2] == 'Assigned_to_Robot' or x[2] == 'Reject']
+        hcassign = [x[2] for x in self.action_times_human if x[2] == 'Cancel_Assign' or x[2] == 'Cancel_Wrong_Assign']
 
-        hassign = [x[3] for x in self.action_times_human if x[3] == 'tray2']
-        hhassign = [x[3] for x in self.action_times_human if x[3] == 'allocate' or x[3] == 'error2']
-        hhhassign = [x[3] for x in self.action_times_human if x[3] == 'error2']
-        self.n_tot_hum_assign = len(hhassign)
-        self.n_error2 = len(hhhassign)
-        self.n_self_hum_assign = len(hassign)
-        print('n assigned by human: ', self.n_self_hum_assign, ' -- ', self.n_error2)
+        self.n_tot_hum_assign = len(hassign)
         print('n assigned total by human: ', self.n_tot_hum_assign)
 
-        rassign = [x[3] for x in self.action_times_robot if x[5] == 'allocate']
-        rassign2 = [x[3] for x in self.action_times_robot if x[5] == 'tray2']
+        total_human_tasks = [x[2] for x in self.action_times_human if (x[2] == 'Wrong_Return' or
+                                                                       x[2] == 'Return' or
+                                                                       x[2] == 'Correct_Return' or
+                                                                       x[2] == 'Human' or
+                                                                       x[2] == 'Wrong_Return' or
+                                                                       x[2] == 'Assigned_to_Human')]
 
+        n_total_human_tasks = len(total_human_tasks)
+
+
+        rassign = [x[3] for x in self.action_times_robot if x[5] == 'Assigned_to_Human']
         self.n_tot_rob_assign = len(rassign)
-        self.n_self_rob_assign = len(rassign2)
-        print('n assigned by robot: ', self.n_tot_rob_assign, ' -- ', self.n_self_rob_assign)
+        print('n assigned by robot: ', self.n_tot_rob_assign)
 
-        idletime = [x[2] for x in self.action_times_human]
-        self.idle_time = sum(idletime)
-        print('t idle: ', self.idle_time)
+        total_robot_tasks = [x[3] for x in self.action_times_robot if (x[5] == 'Robot' or
+                                                                       x[5] == 'Assigned_to_Robot' or
+                                                                       x[5] == 'Return' or
+                                                                       x[5] == 'Human_by_Robot')]
 
-        tr = [x[4] for x in self.action_times_robot]
-        self.rob_time = sum(tr)
-        print('t total robot: ', self.rob_time)
+        n_total_robot_tasks = len(total_robot_tasks)
 
-        th = [x[1] for x in self.action_times_human]
-        self.hum_time = sum(th)
-        print('t total human: ', self.hum_time)
 
         self.dr = sum(self.robot_travel_distance)
         self.dh = sum(self.human_travel_distance)
