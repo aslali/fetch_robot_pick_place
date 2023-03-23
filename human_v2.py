@@ -156,7 +156,7 @@ class Human(threading.Thread):
                 self.done_tasks.append(action_number)
             else:
                 print('Unknown case 10')
-
+        return color
         # self.done_tasks.append(action_number)
 
     def get_state_color(self, action):
@@ -177,6 +177,19 @@ class Human(threading.Thread):
     def get_marker_number(self, msg):
         self.marker_id = int(msg[0:])
 
+    def get_travel_distance(self, task_color):
+            if task_color == 'green':
+                td = param.d_human_close
+            elif task_color == 'blue':
+                td = param.d_human_far
+            elif task_color == 'orange':
+                td = param.d_human_close
+            elif task_color == 'pink':
+                td = param.d_human_far
+            else:
+                raise Exception('Unknown color')
+            return td
+
     def run(self):
         # self.human_action('T', 'W4', 4, 10)
         # self.human_action('T', 'W3',2,2)
@@ -187,13 +200,14 @@ class Human(threading.Thread):
             if msg_from_human is not None:
                 start_time = self.measure.start_time()
                 if len(msg_from_human) > 3:
-                    self.get_human_action(msg_from_human)
+                    color = self.get_human_action(msg_from_human)
                     self.task.temp_unavailable_task = self.human_current_action
                 else:
                     self.get_marker_number(msg_from_human)
                 if self.save_action is not None:
                     self.measure.action_end(start_time_total=0, agent='human',
-                                            travel_distance=0, action_type=self.save_action,
+                                            travel_distance=self.get_travel_distance(color),
+                                            action_type=self.save_action,
                                             action_number=1)
                 self.save_action = None
 

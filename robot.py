@@ -122,10 +122,12 @@ class Fetch(threading.Thread):
         ws = next_action['workspace']
         box = next_action['box']
         color = next_action['color']
+        travel_distance = 0
 
         if next_action['type'] == 'Return':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
             action_type = self.action_list['Return']
+            travel_distance = self.get_travel_distance(color=color, action= 'Return')
         elif next_action['type'] == 'Reject':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
             action_type = self.action_list['Reject']
@@ -135,18 +137,38 @@ class Fetch(threading.Thread):
             action_type = self.action_list['Assigned_to_Human']
         elif next_action['type'] == 'Human_by_Robot':
             action_type = self.action_list['Human_by_Robot']
+            travel_distance = self.get_travel_distance(color)
+
         elif next_action['type'] == 'Robot':
             action_type = self.action_list['Robot']
             if next_action['action_number'] in self.human.human_wrong_actions:
                 self.human.human_wrong_actions.pop(next_action['action_number'])
+            travel_distance = self.get_travel_distance(color)
         elif next_action['type'] == 'Assigned_to_Robot':
             if next_action['action_number'] in self.human.human_wrong_actions:
                 self.human.human_wrong_actions.pop(next_action['action_number'])
             action_type = self.action_list['Assigned_to_Robot']
+            travel_distance = self.get_travel_distance(color)
 
         msg = str(action_type) + str(ws) + str(box) + str(gui_color_code[color])
         self.team_server.send_message(msg)
+        return travel_distance
 
+    def get_travel_distance(self, task_color, action=None):
+            if action == "Return":
+                td = 100
+            else:
+                if task_color == 'green':
+                    td = param.d_robot_close
+                elif task_color == 'blue':
+                    td = param.d_robot_far
+                elif task_color == 'orange':
+                    td = param.d_robot_close
+                elif task_color == 'pink':
+                    td = param.d_robot_far
+                else:
+                    raise Exception('Unknown color')
+            return td
 
 
 
