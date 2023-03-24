@@ -1,5 +1,7 @@
-import matplotlib.pyplot as plt
+
 import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import time
 import pickle
 import os
@@ -7,7 +9,7 @@ import os
 
 class Measure:
 
-    def __init__(self, case_name):
+    def __init__(self, directory, case_name):
         self.action_times_human = []
         self.action_times_robot = []
         self.total_times_human = 0
@@ -20,6 +22,7 @@ class Measure:
         self.df = {}
         self.init_time = None
         self.case_name = case_name
+        self.directory = directory
         self.twrong = None
         self.nwrong = None
         self.n_tot_hum_assign = None
@@ -115,17 +118,17 @@ class Measure:
         ax.set_title(r'Expected values of $p_e$ and $p_f$', fontsize=16)
         ax.set_ylim([0, 1])
         ax.set_xlim([0, round(x_val1[-1]+10)])
-        ax.set_xticks(range(0, round(x_val1[-1]+10), 20))
+        ax.set_xticks(range(0, int(round(x_val1[-1]+10)), 20))
         ax.set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)
-        # fig.savefig('samplefigure.png', format='png', bbox_extra_artists=(lgd,), bbox_inches='tight')
-        plt.show()
+        fig.savefig('samplefigure.png', format='png', bbox_extra_artists=(lgd,), bbox_inches='tight')
+        # plt.show()
 
     def plot_human_measure_ind(self):
         for i in range(len(self.p_f)):
             fig, ax = plt.subplots()
-            x_val1 = [x[0]  for x in self.p_f[0:i+1]]
+            x_val1 = [x[0] for x in self.p_f[0:i+1]]
             y_val1 = [x[1] for x in self.p_f[0:i+1]]
             x_val2 = [x[0] for x in self.p_e[0:i+1]]
             y_val2 = [x[1] for x in self.p_e[0:i+1]]
@@ -182,7 +185,7 @@ class Measure:
             axs[i, j].set_xlim([0, 1])
             axs[i, j].set_ylim([0, 1])
             tit = 't={}'.format(round(p, 2))
-            axs[i, j].set_title(tit, y=1.0, pad=-14, fontsize=13)
+            axs[i, j].set_title(tit, y=1.0, fontsize=13) #pad=-14
             if j > 0:
                 axs[i, j].set_yticklabels([])
             elif i == 1:
@@ -208,8 +211,8 @@ class Measure:
 
         fig.text(0.5, 0.04, r'$p_e$', fontsize=15, ha='center')
         fig.text(0.04, 0.5, r'$P(p_e)$', fontsize=15, va='center', rotation='vertical')
-        # plt.savefig('dist_error.eps', format='eps', bbox_inches='tight', pad_inches=0)
-        plt.show()
+        plt.savefig('dist_error.jpg', format='jpg', bbox_inches='tight', pad_inches=0)
+        # plt.show()
 
     def human_dist_follow(self, start_time, pf, sf):
         st = (start_time - self.init_time)
@@ -251,7 +254,7 @@ class Measure:
             axs[i, j].set_xlim([0, 1])
             axs[i, j].set_ylim([0, 1])
             tit = 't={}'.format(round(p, 2))
-            axs[i, j].set_title(tit, y=1.0, pad=-14, fontsize=13)
+            axs[i, j].set_title(tit, y=1.0, fontsize=13) #pad=-14
             if j > 0:
                 axs[i, j].set_yticklabels([])
             elif i == 1:
@@ -277,8 +280,8 @@ class Measure:
 
         fig.text(0.5, 0.04, r'$p_f$', fontsize=15, ha='center')
         fig.text(0.04, 0.5, r'$P(p_f)$', fontsize=15, va='center', rotation='vertical')
-        # plt.savefig('dist_follow.eps', format='eps', bbox_inches='tight', pad_inches=0)
-        plt.show()
+        plt.savefig('dist_follow.jpg', format='jpg', bbox_inches='tight', pad_inches=0)
+        # plt.show()
 
     # def plot_times_actions(self):
     #     htime_gantt = []
@@ -309,9 +312,11 @@ class Measure:
     def run_all(self):
 
         self.creat_table()
-        filename = self.case_name + ".pickle"
+        filename = os.path.join(self.directory, self.case_name)
         try:
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            if not os.path.exists(filename):
+                os.makedirs(os.path.dirname(filename))
+            # os.makedirs(os.path.dirname(filename), exist_ok=True)
             with open(filename, "wb") as f:
                 pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
         except Exception as ex:

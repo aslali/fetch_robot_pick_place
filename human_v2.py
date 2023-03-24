@@ -1,5 +1,5 @@
 import threading
-from all_parameters import gui_color_code
+import all_parameters as param
 
 
 class Human(threading.Thread):
@@ -24,6 +24,7 @@ class Human(threading.Thread):
         self.returned_action = None
         self.last_action_number = -1
         self.measure = measure
+        self.old_color = None
         self.save_action = None
         self.wait_human = True
 
@@ -32,6 +33,7 @@ class Human(threading.Thread):
         # self.team_server.start()
 
     def get_human_action(self, action):
+        travel_distance = 0
         box_state, previous_box_state, color = self.get_state_color(action)
         action_number, workspace, box = self.get_action_number(action)
         self.last_action_number = action_number
@@ -91,6 +93,7 @@ class Human(threading.Thread):
                 self.action_right_choose[action_number] = 1  # check this
                 self.human_current_action = None
                 self.save_action = 'Assigned_to_Human'
+                travel_distance = self.get_travel_distance(task_color=color)
             elif action_number not in self.task.tasks_allocated_to_human:
                 # if action_number < 20:
                 if self.is_correct(color=color, action_number=action_number):
@@ -102,6 +105,7 @@ class Human(threading.Thread):
                                                              'workspace': workspace,
                                                              'box': box, 'id': self.marker_id}
                     self.save_action = 'Return'
+                travel_distance = self.get_travel_distance(task_color=color)
                 # else:
                 #     self.task.finished_tasks.append(action_number)
                 self.human_current_action = None
@@ -113,6 +117,7 @@ class Human(threading.Thread):
 
         elif box_state == 'Return':
             self.returning_action = action_number
+            self.old_color = color
         elif box_state == 'Free':
             if previous_box_state == 'Assigned_to_Robot':
                 if action_number in self.task.tasks_allocated_to_robot:
@@ -151,17 +156,17 @@ class Human(threading.Thread):
                             break
 
                     self.save_action = 'Wrong_Return'
-
+                travel_distance = self.get_travel_distance(task_color=self.old_color)
                 self.action_right_choose[action_number] = 1
                 self.done_tasks.append(action_number)
             else:
                 print('Unknown case 10')
-        return color
+        return color, travel_distance
         # self.done_tasks.append(action_number)
 
     def get_state_color(self, action):
         col_code = int(action[4])
-        color = gui_color_code[col_code]
+        color = param.gui_color_code[col_code]
         return self.all_box_states[int(action[1])], self.all_box_states[int(action[0])], color
 
     def is_correct(self, color, action_number):
@@ -200,13 +205,13 @@ class Human(threading.Thread):
             if msg_from_human is not None:
                 start_time = self.measure.start_time()
                 if len(msg_from_human) > 3:
-                    color = self.get_human_action(msg_from_human)
+                    color, travel_distance = self.get_human_action(msg_from_human)
                     self.task.temp_unavailable_task = self.human_current_action
                 else:
                     self.get_marker_number(msg_from_human)
                 if self.save_action is not None:
                     self.measure.action_end(start_time_total=0, agent='human',
-                                            travel_distance=self.get_travel_distance(color),
+                                            travel_distance=travel_distance,
                                             action_type=self.save_action,
                                             action_number=1)
                 self.save_action = None

@@ -8,3 +8,7 @@ d_human_far = d_human_close + 2 * 4.5 + 2 * 8.5
 
 t_robot_close = 55
 t_robot_far = 75
+
+d_robot_close = 2*2
+d_robot_far = 6*2
+d_robot_return = 4

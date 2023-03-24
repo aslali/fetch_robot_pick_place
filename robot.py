@@ -3,11 +3,10 @@ from fetch_robot.tp_initialize_robot import RobotControl
 from fetch_robot import tp_blocks
 import planner
 import threading
-from all_parameters import gui_color_code
+import all_parameters as param
 import time
 import rospy
 import sys
-
 
 
 class Fetch(threading.Thread):
@@ -30,15 +29,12 @@ class Fetch(threading.Thread):
         self.action_list = {'Robot': 0, 'Done': 1, 'Assigned_to_Human': 2, 'Assigned_to_Robot': 3, 'Reject': 4,
                             'Return': 5, 'Human_by_Robot': 6}
 
-
         self.all_allocated_tasks = []
         self.cur_allocated_tasks = []
         self.interaction_history = []
         self.pre_human_tasks_done = []
         self.pre_human_wrong_actions = []
         self.human_accuracy_history = []
-
-
 
         self.save_init_sol = False
         self.safe_dist_hr = 180
@@ -127,7 +123,7 @@ class Fetch(threading.Thread):
         if next_action['type'] == 'Return':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
             action_type = self.action_list['Return']
-            travel_distance = self.get_travel_distance(color=color, action= 'Return')
+            travel_distance = self.get_travel_distance(color=color, action='Return')
         elif next_action['type'] == 'Reject':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
             action_type = self.action_list['Reject']
@@ -150,27 +146,25 @@ class Fetch(threading.Thread):
             action_type = self.action_list['Assigned_to_Robot']
             travel_distance = self.get_travel_distance(color)
 
-        msg = str(action_type) + str(ws) + str(box) + str(gui_color_code[color])
+        msg = str(action_type) + str(ws) + str(box) + str(param.gui_color_code[color])
         self.team_server.send_message(msg)
         return travel_distance
 
     def get_travel_distance(self, task_color, action=None):
-            if action == "Return":
-                td = 100
+        if action == "Return":
+            td = param.d_robot_return
+        else:
+            if task_color == 'green':
+                td = param.d_robot_close
+            elif task_color == 'blue':
+                td = param.d_robot_far
+            elif task_color == 'orange':
+                td = param.d_robot_close
+            elif task_color == 'pink':
+                td = param.d_robot_far
             else:
-                if task_color == 'green':
-                    td = param.d_robot_close
-                elif task_color == 'blue':
-                    td = param.d_robot_far
-                elif task_color == 'orange':
-                    td = param.d_robot_close
-                elif task_color == 'pink':
-                    td = param.d_robot_far
-                else:
-                    raise Exception('Unknown color')
-            return td
-
-
+                raise Exception('Unknown color')
+        return td
 
     def run(self):
         # try:
@@ -197,7 +191,7 @@ class Fetch(threading.Thread):
         new_robot_task = None
         new_human_task = None
         next_robot_turn = False
-        isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
+        isfinished = (len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0)
         print(self.team_server.conn)
         while self.team_server.conn is None:
             print('waiting')
@@ -206,7 +200,9 @@ class Fetch(threading.Thread):
             print ('waiting for the human')
         while not isfinished:
             start_time_total = self.measure.start_time()
-            self.team_server.send_message('8000')
+            if len(set(self.task.remained_task_both) - set([self.human.human_current_action])) + len(self.task.remained_task_robot_only) > 0:
+                self.team_server.send_message('8000')
+                gui_deactivated = True
             self.task.find_remained_task()
             self.task.remove_finished_task_precedence()
 
@@ -249,7 +245,8 @@ class Fetch(threading.Thread):
                                                            all_human_error=self.human.human_wrong_actions,
                                                            error_info=self.human.wrong_action_info)
 
-                wrong_assign = [ii for ii in self.human.human_wrong_actions if self.human.human_wrong_actions[ii] == 'Reject']
+                wrong_assign = [ii for ii in self.human.human_wrong_actions if
+                                self.human.human_wrong_actions[ii] == 'Reject']
                 if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot or wrong_assign:
                     for ts in hum_new_actions:
                         if self.human.action_right_choose[ts] == 1:
@@ -267,10 +264,9 @@ class Fetch(threading.Thread):
                                                            sf=self.planner.alpha_set)
                 self.cur_allocated_tasks = self.task.tasks_allocated_to_human[:]
 
-
             self.measure.human_measures(start_time=start_time_total, p_error=self.planner.p_human_error,
                                         p_following=self.planner.p_human_allocation)
-            isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
+            isfinished = (len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0)
             if not isfinished:
                 if next_robot_turn:
                     fselec = False
@@ -282,7 +278,6 @@ class Fetch(threading.Thread):
                         fschedule = True
                     else:
                         fschedule = self.is_scheduling()
-
 
                 if fschedule and not isfinished:
                     is_solution = False
@@ -297,6 +292,8 @@ class Fetch(threading.Thread):
                         htasks, rtasks, new_pr, new_pr_type2, ttasks = self.task.create_new_task(
                             new_robot_tasks=new_robot_task,
                             new_human_tasks=new_human_task)
+                        if not rtasks:
+                            break
                         rtiming, htiming, precedence, is_solution = self.planner.task_scheduler(task_time=ttasks,
                                                                                                 human_tasks=htasks,
                                                                                                 robot_tasks=rtasks,
@@ -305,74 +302,79 @@ class Fetch(threading.Thread):
                                                                                                 remaining_tasks=self.task.remained_tasks,
                                                                                                 tasks_human_error=self.task.human_error_tasks,
                                                                                                 tasks_human_error_type1=self.task.human_error_tasks_return,
-                                                                                                tasks_human_error_type2=self.task.human_error_tasks_reject,
+                                                                                                tasks_human_error_type2=self.task.human_error_tasks_reject
                                                                                                 )
-                    cur_step_actions = [i for i in rtiming if rtiming[i] == 0]
-                    t_tray = [i for i in cur_step_actions if i in new_pr_type2]
-                    tray_t = [i for i in cur_step_actions if i in self.task.human_error_tasks_reject]
-                    w_tray = list(set(cur_step_actions) - set(tray_t) - set(t_tray))
-                    available_actions = tray_t + t_tray + w_tray
-                    if not available_actions:
-                        ccccccccccccc = 1
-                    counter = 0
+                    if rtasks:
+                        cur_step_actions = [i for i in rtiming if rtiming[i] == 0]
+                        t_tray = [i for i in cur_step_actions if i in new_pr_type2]
+                        tray_t = [i for i in cur_step_actions if i in self.task.human_error_tasks_reject]
+                        w_tray = list(set(cur_step_actions) - set(tray_t) - set(t_tray))
+                        available_actions = tray_t + t_tray + w_tray
+                        if not available_actions:
+                            ccccccccccccc = 1
+                        counter = 0
                 else:
                     counter += 1
 
-                next_action, next_robot_turn, available_actions = self.action_from_schedule(timerob=rtiming,
+                if rtasks:
+                    next_action, next_robot_turn, available_actions = self.action_from_schedule(timerob=rtiming,
                                                                                             available_actions=available_actions,
                                                                                             precedence=precedence,
                                                                                             count=counter)
+                    travel_dist = self.robot_action(next_action)
+
                 self.pre_human_tasks_done = self.human.done_tasks[:]
                 self.pre_human_wrong_actions = list(self.human.human_wrong_actions.keys())
-                start_time_action = self.measure.start_time()
-                travel_dist = self.robot_action(next_action)
+                if gui_deactivated:
+                    self.team_server.send_message('9000')
+                    gui_deactivated = False
 
-                self.team_server.send_message('9000')
 
-                send_done_message = False
-                if next_action['type'] == 'Robot':
-                    if self.robot_connected:
-                        self.action(block_col=next_action['color'], place_num=next_action['box'],
-                                    place_loc=next_action['workspace'])
-                    else:
-                        time.sleep(1)
-                    send_done_message = True
-                elif next_action['type'] == 'Assigned_to_Robot':
-                    if self.robot_connected:
-                        self.action(block_col=next_action['color'], place_num=next_action['box'],
-                                    place_loc=next_action['workspace'])
-                    else:
-                        time.sleep(1)
-                    send_done_message = True
-                elif next_action['type'] == 'Return':
-                    if self.robot_connected:
-                        self.action(pick_loc=next_action['workspace']*10 + next_action['workspace'], place_loc=6, place_num=1, block_id=next_action['id'])
-                    else:
-                        time.sleep(1)
-                    send_done_message = True
-                elif next_action['type'] == 'Human_by_Robot':
-                    if self.robot_connected:
-                        self.action(block_col=next_action['color'], place_num=next_action['box'],
-                                    place_loc=next_action['workspace'])
-                    else:
-                        time.sleep(1)
-                    send_done_message = True
+                if rtasks:
+                    start_time_action = self.measure.start_time()
+                    send_done_message = False
+                    if next_action['type'] == 'Robot':
+                        if self.robot_connected:
+                            self.action(block_col=next_action['color'], place_num=next_action['box'],
+                                        place_loc=next_action['workspace'])
+                        else:
+                            time.sleep(1)
+                        send_done_message = True
+                    elif next_action['type'] == 'Assigned_to_Robot':
+                        if self.robot_connected:
+                            self.action(block_col=next_action['color'], place_num=next_action['box'],
+                                        place_loc=next_action['workspace'])
+                        else:
+                            time.sleep(1)
+                        send_done_message = True
+                    elif next_action['type'] == 'Return':
+                        if self.robot_connected:
+                            self.action(pick_loc=next_action['workspace'] * 10 + next_action['workspace'], place_loc=6,
+                                        place_num=1, block_id=next_action['id'])
+                        else:
+                            time.sleep(1)
+                        send_done_message = True
+                    elif next_action['type'] == 'Human_by_Robot':
+                        if self.robot_connected:
+                            self.action(block_col=next_action['color'], place_num=next_action['box'],
+                                        place_loc=next_action['workspace'])
+                        else:
+                            time.sleep(1)
+                        send_done_message = True
 
-                if send_done_message:
-                    msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
-                          + str(gui_color_code[next_action['color']])
-                    self.team_server.send_message(msg)
-            self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
-                                    agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
-                                    action_number=next_action['action_number'])
+                    if send_done_message:
+                        msg = str(self.action_list['Done']) + str(next_action['workspace']) + str(next_action['box']) \
+                              + str(param.gui_color_code[next_action['color']])
+                        self.team_server.send_message(msg)
+                    self.measure.action_end(start_time_total=start_time_total, start_time_action=start_time_action,
+                                            agent='robot', travel_distance=travel_dist, action_type=next_action['type'],
+                                            action_number=next_action['action_number'])
             #
             # aaaaaaa = 1
-            isfinished = len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0
+            isfinished = (len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0)
 
         self.measure.run_all()
 
         # except Exception as ex:
         #     print(ex)
-            # self.team_server.server_disconnect()
-
-
+        # self.team_server.server_disconnect()
