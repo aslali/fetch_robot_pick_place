@@ -159,9 +159,9 @@ class Fetch(threading.Thread):
             elif task_color == 'blue':
                 td = param.d_robot_far
             elif task_color == 'orange':
-                td = param.d_robot_close
-            elif task_color == 'pink':
                 td = param.d_robot_far
+            elif task_color == 'pink':
+                td = param.d_robot_close
             else:
                 raise Exception('Unknown color')
         return td
