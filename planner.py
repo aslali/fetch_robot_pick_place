@@ -3,7 +3,7 @@ from scipy.stats import norm
 from scipy.stats import binom
 import pulp as plp
 import gurobipy
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # plt.rcParams['pdf.fonttype'] = 42
 # plt.rcParams['ps.fonttype'] = 42
@@ -83,23 +83,23 @@ class Planner:
         self.pbeta = rv1.pmf(x)
         self.p_human_error = sum([a * b for a, b in zip(self.pbeta, self.beta_set)])
 
-    def gantt_chart(self, th, tr):
-        fig, gnt = plt.subplots()
-        gnt.set_ylim(0, 50)
-        # Setting X-axis limits
-        gnt.set_xlim(0, 300)
-        # Setting labels for x-axis and y-axis
-        gnt.set_xlabel('seconds since start')
-        # Setting ticks on y-axis
-        gnt.set_yticks([15, 25, 35])
-        # Labelling tickes of y-axis
-        gnt.set_yticklabels(['Robot', '', 'Human'])
-        # Setting graph attribute
-        gnt.grid(True)
-        # Declaring a bar in schedule
-        gnt.broken_barh(th, (30, 9), facecolors=('olive', 'c'))
-        gnt.broken_barh(tr, (10, 9), facecolors=('olive', 'c'))
-        plt.show()
+    # def gantt_chart(self, th, tr):
+    #     fig, gnt = plt.subplots()
+    #     gnt.set_ylim(0, 50)
+    #     # Setting X-axis limits
+    #     gnt.set_xlim(0, 300)
+    #     # Setting labels for x-axis and y-axis
+    #     gnt.set_xlabel('seconds since start')
+    #     # Setting ticks on y-axis
+    #     gnt.set_yticks([15, 25, 35])
+    #     # Labelling tickes of y-axis
+    #     gnt.set_yticklabels(['Robot', '', 'Human'])
+    #     # Setting graph attribute
+    #     gnt.grid(True)
+    #     # Declaring a bar in schedule
+    #     gnt.broken_barh(th, (30, 9), facecolors=('olive', 'c'))
+    #     gnt.broken_barh(tr, (10, 9), facecolors=('olive', 'c'))
+    #     plt.show()
 
     # def gantt_chart(self, th, tr):
     #

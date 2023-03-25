@@ -90,7 +90,11 @@ class Human(threading.Thread):
                 self.human_actions_from_allocated.append(action_number)
                 self.done_tasks.append(action_number)
                 self.task.finished_tasks.append(action_number)
-                self.action_right_choose[action_number] = 1  # check this
+                not_allocated_tasks, human_available_wrong_tasks = self.get_available_tasks()
+                if len(not_allocated_tasks + human_available_wrong_tasks) > 1:
+                    self.action_right_choose[action_number] = 1
+                else:
+                    self.action_right_choose[action_number] = 0
                 self.human_current_action = None
                 self.save_action = 'Assigned_to_Human'
                 travel_distance = self.get_travel_distance(task_color=color)
@@ -195,6 +199,32 @@ class Human(threading.Thread):
                 raise Exception('Unknown color')
             return td
 
+    def get_available_tasks(self):
+        human_available_task = []
+        human_available_task_error = []
+        human_available_wrong_tasks = []
+        type1_error = [i for i in self.human_wrong_actions if self.human_wrong_actions[i] == 'Return']
+        # type2_error = [i for i in self.human_wrong_actions if self.human_wrong_actions[i] == 'type2']
+        cor_wrong_actions = list(set(self.task.remained_tasks) - set(type1_error))
+        for i in self.task.remained_tasks:
+            robtas = i in self.task.remained_task_robot_only
+            preced_check_with_error = any(j in cor_wrong_actions for j in self.task.task_precedence_dict[i])
+            preced_check_no_error = any(j in self.task.remained_tasks for j in self.task.task_precedence_dict[i])
+            rob_alloc = i in self.task.tasks_allocated_to_robot
+            wrong_act = i in self.human_wrong_actions
+
+            if (not robtas) and (not preced_check_with_error) and (not rob_alloc) and (not wrong_act):
+                human_available_task_error.append(i)
+                if not preced_check_no_error:
+                    human_available_task.append(i)
+                else:
+                    human_available_wrong_tasks.append(i)
+
+        not_allocated_tasks = list(set(human_available_task) - set(self.task.tasks_allocated_to_human))
+        not_allocated_tasks_error = list(set(human_available_task_error) - set(self.task.tasks_allocated_to_human))
+        tasks_to_allocate = list(set(not_allocated_tasks) - set(self.task.tasks_allocated_to_robot))
+
+        return not_allocated_tasks, human_available_wrong_tasks
     def run(self):
         # self.human_action('T', 'W4', 4, 10)
         # self.human_action('T', 'W3',2,2)
@@ -215,7 +245,7 @@ class Human(threading.Thread):
                                             action_type=self.save_action,
                                             action_number=1)
                 self.save_action = None
-
+                self.get_available_tasks()
                 print('wrong actions: ', self.human_wrong_actions)
                 print('done tasks: ', self.done_tasks)
                 print('from allocated: ', self.human_actions_from_allocated)
