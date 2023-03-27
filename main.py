@@ -36,12 +36,12 @@ team_server = server.ServerControl()
 team_server.daemon = True
 team_server.start()
 
-measure = measure.Measure(directory='fair', case_name='f5.pickle')
+measure = measure.Measure(directory='follow_high', case_name='follow_high.pickle')
 print('phase1')
 human = human_v2.Human(task=task, team_server=team_server, measure=measure)
 # human.daemon = True
 print('phase2')
-robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server, measure=measure, robot_connected=False)
+robot = robot.Fetch(sim_env=sim_env, task=task, human=human, team_server=team_server, measure=measure, robot_connected=True)
 # robot.daemon = True
 print('phase3')
 

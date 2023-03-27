@@ -8,7 +8,7 @@ YELLOW_HSV = cur_hsv = [0, 0, 100]
 RED_HSV = [0, 100, 80]
 
 
-def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_id=None, pick_col=None, returning=False, d_thrd_pick=0.7, d_thrd_place=0.7):
+def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_id=None, pick_col=None, returning=False, d_thrd_pick=0.7, d_thrd_place=0.76):
     # pick_id = blocks.color2id(pick_col, robot_con.markers.all_markers_by_distance)
     # imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(), pick_id)
     if pick_loc is None:
@@ -97,7 +97,7 @@ def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_i
     else:
         safety_light(stat=1)
     PLACE_ID = PLACE_IDS[place_loc]
-    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=1, dtime=90), PLACE_ID[place_num])
+    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=1, dtime=450), PLACE_ID[place_num])
     p3 = PLACE_TABLE_POS[place_loc]
     if not imdp:
         robot_control.fetch_base.goto(x=p3[0], y=p3[1], theta=p3[2])  # x=-2.57

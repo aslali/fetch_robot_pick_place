@@ -33,6 +33,8 @@ class Measure:
         self.idle_time = None
         self.rob_time = None
         self.hum_time = None
+        self.experiment_start_time = 0
+        self.experiment_end_time = 0
 
 
     def start_time(self):

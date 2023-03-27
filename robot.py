@@ -123,7 +123,7 @@ class Fetch(threading.Thread):
         if next_action['type'] == 'Return':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
             action_type = self.action_list['Return']
-            travel_distance = self.get_travel_distance(color=color, action='Return')
+            travel_distance = self.get_travel_distance(task_color=color, action='Return')
         elif next_action['type'] == 'Reject':
             self.human.human_wrong_actions.pop(next_action['correcting_action'])
             action_type = self.action_list['Reject']
@@ -195,6 +195,7 @@ class Fetch(threading.Thread):
         print(self.team_server.conn)
         while self.team_server.conn is None:
             print('waiting')
+        self.measure.experiment_start_time = self.measure.start_time()
         while self.human.wait_human:
             time.sleep(1)
             print ('waiting for the human')
@@ -373,6 +374,7 @@ class Fetch(threading.Thread):
             # aaaaaaa = 1
             isfinished = (len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0)
 
+        self.measure.experiment_end_time = self.measure.start_time()
         self.measure.run_all()
 
         # except Exception as ex:
