@@ -6,6 +6,7 @@ import threading
 import all_parameters as param
 import time
 import rospy
+import server
 import sys
 
 
@@ -40,11 +41,19 @@ class Fetch(threading.Thread):
         self.safe_dist_hr = 180
         self.measure = measure
 
+        if self.robot_connected:
+            self.conveyor_server = server.ServerControl(port_num=5078)
+            self.conveyor_server.daemon = True
+            self.conveyor_server.start()
+
     def action(self, place_loc, place_num, pick_loc=None, block_col=None, block_id=None):
 
         if block_id:
             pickplace(robot_control=self.robot_con, place_loc=place_loc, place_num=place_num, blocks=self.blocks,
                       pick_loc=pick_loc, pick_id=block_id, returning=True, d_thrd_place=0.5)
+            self.conveyor_server.send_message('1')
+            time.sleep(9)
+            self.conveyor_server.send_message('0')
         else:
             pickplace(robot_control=self.robot_con, place_loc=place_loc, place_num=place_num, blocks=self.blocks,
                       pick_loc=pick_loc, pick_col=block_col)
@@ -192,7 +201,12 @@ class Fetch(threading.Thread):
         new_human_task = None
         next_robot_turn = False
         isfinished = (len(self.task.remained_task_both) + len(self.task.remained_task_robot_only) == 0)
-        print(self.team_server.conn)
+        if self.robot_connected:
+            while self.conveyor_server.conn is None:
+                print('waiting for conveyor')
+            self.conveyor_server.send_message('1')
+            time.sleep(3)
+            self.conveyor_server.send_message('0')
         while self.team_server.conn is None:
             print('waiting')
         self.measure.experiment_start_time = self.measure.start_time()
@@ -339,28 +353,28 @@ class Fetch(threading.Thread):
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(1)
+                            time.sleep(15)
                         send_done_message = True
                     elif next_action['type'] == 'Assigned_to_Robot':
                         if self.robot_connected:
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(1)
+                            time.sleep(15)
                         send_done_message = True
                     elif next_action['type'] == 'Return':
                         if self.robot_connected:
                             self.action(pick_loc=next_action['workspace'] * 10 + next_action['workspace'], place_loc=6,
                                         place_num=1, block_id=next_action['id'])
                         else:
-                            time.sleep(1)
+                            time.sleep(15)
                         send_done_message = True
                     elif next_action['type'] == 'Human_by_Robot':
                         if self.robot_connected:
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(1)
+                            time.sleep(15)
                         send_done_message = True
 
                     if send_done_message:

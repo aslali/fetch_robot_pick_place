@@ -64,7 +64,6 @@ class BaseControl(object):
                 tw.linear.x = abs(0)
                 self._pub.publish(tw)
             init_pos = self.get_pose()
-            print(init_pos)
             dx = 0
             dy = 0
             while max(dx, dy) < distance:
@@ -74,7 +73,6 @@ class BaseControl(object):
                 dx = abs(cur_pos[0] - init_pos[0])
                 dy = abs(cur_pos[1] - init_pos[1])
                 # old_pos = copy.copy(cur_pos)
-            print(cur_pos)
         elif (second is not None) and (distance is not None):
             print("only one of second or distance!")
 
@@ -96,7 +94,6 @@ class BaseControl(object):
                 tw.linear.x = -abs(0)
                 self._pub.publish(tw)
             init_pos = self.get_pose()
-            print(init_pos)
             dx = 0
             dy = 0
             while max(dx, dy) < distance:
@@ -106,7 +103,6 @@ class BaseControl(object):
                 dx = abs(cur_pos[0] - init_pos[0])
                 dy = abs(cur_pos[1] - init_pos[1])
                 # old_pos = copy.copy(cur_pos)
-            print(cur_pos)
         elif (second is not None) and (distance is not None):
             print("only one of second or distance!")
 

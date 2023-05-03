@@ -15,49 +15,55 @@ def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_i
         pick_loc = BLOCK_LOCATIONS[pick_col]
     p1 = PICK_TABLE_POS[pick_loc]
     robot_control.fetch_base.goto(x=p1[0], y=p1[1], theta=p1[2])
+    time.sleep(0.5)
+    print('in the first position')
     if returning:
         safety_light(stat=1)
     else:
         safety_light(stat=0)
 
-    if not False:
-        if pick_id is None:
-            pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=30), p1)
-        imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=30), pick_id)
-        if not imd:
-            turns, actual_pose = head_slow_sweep(robot_control, pi / 6)
-            for i in turns:
-                ctime = time.time()
-                while time.time() - ctime < 1:
-                    if pick_id < 0:
-                        pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=30), p1)
-                    imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=30), pick_id)
-                    if imd:
-                        break
-                if not imd:
-                    robot_control.fetch_head.move_head(i, 0.4)
-                    time.sleep(0.1)
+    if pick_id is None:
+        pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=30), p1)
+    imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=30), pick_id)
+    if not imd:
+        turns, actual_pose = head_slow_sweep(robot_control, pi / 6)
+        for i in turns:
+            ctime = time.time()
+            while time.time() - ctime < 1:
+                if pick_id < 0:
+                    pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=30), p1)
+                imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=30), pick_id)
+                if imd:
+                    break
+            if not imd:
+                robot_control.fetch_head.move_head(i, 0.4)
+                time.sleep(0.1)
 
     if not imd:  # todo: what we can do for this case?
+        print('couldnt find the marker in the first phase')
         return False
 
-    p2 = near_table_loc(marker_info=minfo[pick_id][1], pick_pos=p1, dxy=0.1)
-    robot_control.fetch_base.goto(x=p2[0], y=p2[1], theta=p2[2])
-    dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(), theta=p2[2])
-    while dro > d_thrd_pick:
-        robot_control.fetch_base.move_forward(distance=dro - d_thrd_pick)
-        dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(), theta=p2[2])
-    time.sleep(0.5)
-    robot_control.fetch_head.look_at(d_thrd_pick, 0.0, minfo[pick_id][0][2] - 0.3)
-    time.sleep(0.5)
-
     while True:
+        p2 = near_table_loc(marker_info=minfo[pick_id][1], pick_pos=p1, dxy=0.1)
+        robot_control.fetch_base.goto(x=p2[0], y=p2[1], theta=p2[2])
+        time.sleep(0.5)
+        print('in the second position')
+
+        dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(), theta=p2[2])
+        while dro > d_thrd_pick:
+            robot_control.fetch_base.move_forward(distance=dro - d_thrd_pick)
+            dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(), theta=p2[2])
+        print ('in the third position')
+        time.sleep(0.5)
+        robot_control.fetch_head.look_at(d_thrd_pick, 0.0, minfo[pick_id][0][2] - 0.3)
+        time.sleep(0.5)
+
         ctime = time.time()
         head_move_cnt = 0
         while time.time() - ctime < 8:
             cctime = time.time()
             while time.time() - cctime < 1:
-                imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=5), pick_id)
+                imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=30), pick_id)
                 if imd:
                     break
             if not imd:
@@ -71,11 +77,12 @@ def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_i
 
         if not imd:
             if not returning:
-                pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=10), p2)
-                print("near the table, couldn't find the object")
+                # pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=30), p2)
+                print("near the table, couldn't find the object and pick id is: ", pick_id)
+                robot_control.fetch_base.move_backward(distance=0.3)
             else:
                 print('cannot return')
-                return False
+                # return False
         else:
             break
 
@@ -175,7 +182,7 @@ def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_i
 
     robot_control.fetch_pick_place.post_place_h = 0.0
     robot_control.fetch_pick_place.post_place_x = 0.7
-    robot_control.fetch_pick_place.place()
+    robot_control.fetch_pick_place.place(release=returning)
     safety_light(stat=0)
 
 

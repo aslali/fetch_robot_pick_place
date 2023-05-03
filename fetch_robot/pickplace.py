@@ -124,7 +124,7 @@ class PickPlace(object):
             self.torso.move_to(self.post_pick_h, duration=2)
             # time.sleep(3)
 
-    def place(self, do_stow=True):
+    def place(self, release=False, do_stow=True):
         if not self.torso.is_there(self.pre_place_h):
             self.torso.move_to(self.pre_place_h, duration=6)
             while not self.torso.is_there(self.pre_place_h):
@@ -143,13 +143,16 @@ class PickPlace(object):
         self.curtime = []
         self.init_time = time.time()
 
-        while time.time() - ctime < 5:
-            # print(self.joint_effort['shoulder_lift_joint'])
-            if self.joint_effort["shoulder_lift_joint"][-1] > 4:
-                self.arm.arm_group.stop()
-                self.gripper.open(pos=OPENED_POS)
-                # self.fetch_arm.arm_group.stop()
-                break
+        if release:
+            self.gripper.open(pos=OPENED_POS)
+        else:
+            while time.time() - ctime < 5:
+                # print(self.joint_effort['shoulder_lift_joint'])
+                if self.joint_effort["shoulder_lift_joint"][-1] > 4:
+                    self.arm.arm_group.stop()
+                    self.gripper.open(pos=OPENED_POS)
+                    # self.fetch_arm.arm_group.stop()
+                    break
 
         # # self.fetch_arm.arm_group.stop()
         # # time.sleep(0.5)

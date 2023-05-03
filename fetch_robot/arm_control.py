@@ -90,7 +90,6 @@ class ArmControl(object):
         self.arm_group.set_start_state_to_current_state()
         self.arm_group.set_joint_value_target(joint_angles)
         plan = self.arm_group.go(wait=wait)
-        print(plan)
         self.arm_group.stop()
         return plan
 
@@ -119,7 +118,6 @@ class ArmControl(object):
 
         # self.arm_group.execute(plan[1])
         plan = self.arm_group.go(wait=wait)
-        # print('plan ', plan)
         if wait:
             self.arm_group.stop()
         self.arm_group.set_max_acceleration_scaling_factor(1)
@@ -129,10 +127,8 @@ class ArmControl(object):
 
     def tuck(self, planning=True, **kwargs):  # local method
         p1 = self.add_box()
-        print('p1', p1)
         time.sleep(1)
         p2 = self.attach_box()
-        print('p2', p2)
         # time.sleep(1)
         if planning:
             result = self.plan_joint_position(self.tuck_joint_value)
@@ -148,10 +144,7 @@ class ArmControl(object):
             result = plan.error_code
 
         p3 = self.detach_box()
-        print('p3', p3)
         p4 = self.remove_box()
-        print('p4', p4)
-        print('plan', result)
 
     def zero(self, planning=True, **kwargs):
         if planning:
@@ -166,7 +159,6 @@ class ArmControl(object):
             plan = self.move_group.moveToJointPosition(self.joint_names, self.zero_values,
                                                        0.02, **kwargs)
             result = plan.error_code
-        print(result)
 
     # def stow(self, planning=True, **kwargs):
     #     if planning:
@@ -181,14 +173,11 @@ class ArmControl(object):
     #         plan = self.move_group.moveToJointPosition(self.joint_names, self.stow_values,
     #                                                    0.02, **kwargs)
     #         result = plan.error_code
-    #     print(result)
 
     def stow(self, planning=True, wait=True, **kwargs):
         p1 = self.add_box()
-        print('p1', p1)
         # time.sleep(1)
         p2 = self.attach_box()
-        print('p2', p2)
         # time.sleep(1)
         if planning:
             result = self.plan_joint_position(self.stow_joint_value, wait=wait)
@@ -203,10 +192,7 @@ class ArmControl(object):
                                                        0.02, **kwargs)
             result = plan.error_code
         p3 = self.detach_box()
-        print('p3', p3)
         p4 = self.remove_box()
-        print('p4', p4)
-        print(result)
 
     def intermediate_stow(self, planning=True, wait=True, **kwargs):
         if planning:
@@ -221,7 +207,6 @@ class ArmControl(object):
             plan = self.move_group.moveToJointPosition(self.joint_names, self.inter_stow_values,
                                                        0.02, **kwargs)
             result = plan.error_code
-        print(result)
 
     def get_pose(self):
         self.actual_positions = self.robot.get_current_state().joint_state.position[6:13]

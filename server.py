@@ -6,10 +6,10 @@ import subprocess, signal
 
 class ServerControl(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, port_num):
         threading.Thread.__init__(self)
         self.HEADER = 64
-        self.PORT = 5077
+        self.PORT = port_num
         # self.SERVER = socket.gethostbyname(socket.gethostname())
         # print(self.SERVER)
         self.SERVER = '0.0.0.0'
@@ -55,14 +55,17 @@ class ServerControl(threading.Thread):
         self.connected = True
         conn.settimeout(100000)
         while self.connected:
-            print(self.connected)
+            # print(self.connected)
             msg_length = conn.recv(self.HEADER).decode(self.FORMAT)
             if msg_length:
-                msg_length = int(msg_length)
-                msg = conn.recv(msg_length).decode(self.FORMAT)
-                if msg == self.DISCONNECT_MESSAGE:
-                    self.connected = False
-                self.message = msg
+                try:
+                    msg_length = int(msg_length)
+                    msg = conn.recv(msg_length).decode(self.FORMAT)
+                    if msg == self.DISCONNECT_MESSAGE:
+                        self.connected = False
+                    self.message = msg
+                except:
+                    pass
                 # print(self.message)
         print('not correct')
         self.server_disconnect()
