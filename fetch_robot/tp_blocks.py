@@ -5,10 +5,12 @@ from math import sqrt
 class Blocks:
     def __init__(self):
         self.all_avbl = {'blue': BLUE, 'orange': ORANGE, 'pink': PINK, 'green': GREEN}
+        self.color = None
 
     def color2id(self, color, markers_info, location):
         min_dist = 10**5
         pick_id = -1
+        self.color = color
         for i in self.all_avbl[color]:
             if i in markers_info:
                 map_distance2 = (markers_info[i][1][0] - location[0])**2 + (markers_info[i][1][1] - location[1])**2 + (markers_info[i][1][2] - location[2])**2
@@ -17,10 +19,10 @@ class Blocks:
                     pick_id = i
                     min_dist = markers_info[i][3]
 
-        try:
-            self.all_avbl[color].remove(pick_id)
-        except ValueError:
-            pass
-
         return pick_id
 
+    def remove_id(self, pick_id):
+        try:
+            self.all_avbl[self.color].remove(pick_id)
+        except ValueError:
+            pass
