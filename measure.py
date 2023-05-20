@@ -319,11 +319,12 @@ class Measure:
             if not os.path.exists(filename):
                 os.makedirs(os.path.dirname(filename))
             # os.makedirs(os.path.dirname(filename), exist_ok=True)
-            with open(filename, "wb") as f:
-                pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
+            # with open(filename, "wb") as f:
+            #     pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
         except Exception as ex:
             print("Error during pickling object (Possibly unsupported):", ex)
-
+        with open(filename, "wb") as f:
+            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
         # self.plot_times_actions()
         self.plot_human_measures()
         self.plot_dists_error()

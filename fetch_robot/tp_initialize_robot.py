@@ -5,6 +5,7 @@ from .torso_control import TorsoControl
 from .gripper_control import GripperControl
 from .fetch_detect_markers import Fetch_markers
 from .pickplace import PickPlace
+from speech_control import SpeechControl
 import time
 
 
@@ -15,6 +16,7 @@ class RobotControl:
         self.fetch_head = HeadControl()
         self.fetch_torso = TorsoControl()
         self.fetch_arm = ArmControl()
+        self.fetch_voice = SpeechControl()
         self.fetch_gripper = GripperControl()
         self.fetch_pick_place = PickPlace()
         self.pick_place_ready()
@@ -35,7 +37,7 @@ class RobotControl:
             time.sleep(6)
 
     def reset_robot(self):
-        if not self.fetch_arm.is_there(fetch_arm.stow_values):
+        if not self.fetch_arm.is_there(self.fetch_arm.stow_values):
             if not self.fetch_torso.is_there(0.4):
                 self.fetch_torso.move_to(0.4, duration=2)
                 time.sleep(2)

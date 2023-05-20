@@ -8,7 +8,7 @@ import measure
 
 
 human_speed = 1
-pattern_number = 2
+pattern_number = 4
 
 
 # pattern = [
@@ -35,13 +35,13 @@ elif pattern_number == 2:
         ['blue', 'green', 'green', 'blue', 'orange'],
         ['pink', 'pink', 'blue', 'green', 'orange']
     ]
-    pattern = [
-        ['orange', 'orange', 'blue', 'blue', 'orange'],
-        ['orange', 'orange', 'orange', 'orange', 'blue'],
-        ['pink', 'orange', 'blue', 'green', 'green'],
-        ['blue', 'green', 'green', 'green', 'pink'],
-        ['blue', 'blue', 'blue', 'green', 'pink']
-    ]
+    # pattern = [
+    #     ['orange', 'orange', 'blue', 'blue', 'orange'],
+    #     ['orange', 'orange', 'orange', 'orange', 'blue'],
+    #     ['pink', 'orange', 'blue', 'green', 'green'],
+    #     ['blue', 'green', 'green', 'green', 'pink'],
+    #     ['blue', 'blue', 'blue', 'green', 'pink']
+    # ]
 elif pattern_number == 3:
     pattern = [
         ['pink', 'orange', 'green', 'orange', 'pink'],
@@ -81,7 +81,7 @@ team_server.start()
 
 
 
-measure = measure.Measure(directory='video1', case_name='test222.pickle')
+measure = measure.Measure(directory='16631', case_name='task4.pickle')
 print('phase1')
 human = human_v2.Human(task=task, team_server=team_server, measure=measure)
 # human.daemon = True

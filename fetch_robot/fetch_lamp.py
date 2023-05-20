@@ -15,11 +15,14 @@ async def set_bulb():
     await bulb.update()
     assert bulb.is_bulb
     await bulb.turn_on()
-    cur_hsv = [0, 0, 100]
+    cur_hsv = [0, 0, 0]
     with open("lamp_stat.txt", "w") as f:
         for s in cur_hsv:
             f.write(str(s) + "\n")
-    await bulb.set_hsv(cur_hsv[0], cur_hsv[1], cur_hsv[2])
+    if cur_hsv[0] == 0 and cur_hsv[1] == 0 and cur_hsv[2] == 0:
+        await bulb.turn_off()
+    else:
+        await bulb.set_hsv(cur_hsv[0], cur_hsv[1], cur_hsv[2])
     time.sleep(3)
     while True:
 
@@ -34,7 +37,10 @@ async def set_bulb():
 
         if (tmp_hsv != cur_hsv) and (len(tmp_hsv) == 3):
             cur_hsv = tmp_hsv
-            await bulb.set_hsv(cur_hsv[0], cur_hsv[1], cur_hsv[2])
+            if cur_hsv[0] == 0 and cur_hsv[1] == 0 and cur_hsv[2] == 0:
+                await bulb.turn_off()
+            else:
+                await bulb.set_hsv(cur_hsv[0], cur_hsv[1], cur_hsv[2])
             await bulb.update()
     await bulb.turn_off()
 

@@ -8,7 +8,7 @@ class SpeechControl(object):
     """ Robot Speech interface """
 
     def __init__(self): #rosrun sound_play soundplay_node.py needs to run on the robot!
-        self.soundhandle = SoundClient()
+        self.soundhandle = SoundClient(blocking=True)
         rospy.sleep(rospy.Duration(1))
         self.ready = rospy.Subscriber("robotsound", SoundRequest, self.sound_ready)
         time.sleep(0.5)
@@ -36,11 +36,11 @@ if __name__ == '__main__':
     #speech_module.soundhandle.playWave("/home/fetch_admin/sounds/confirmation.wav")
     #time.sleep(3)
     speech_module.say(sentence="Hello, I am Fetch. How may I help you?", voice='voice_don_diphone')
-    rospy.sleep(5)
+    # rospy.sleep(5)
     # speech_module.soundhandle.stopAll()
     # time.sleep(2)
     speech_module.say(sentence="Hello, I am Fetch. How may I help you?", voice='voice_kal_diphone')
-    rospy.sleep(5)
+    # rospy.sleep(5)
     # speech_module.say(sentence="Hello, I am Fetch. How may I help you?", voice='voice_rab_diphone')
     # rospy.sleep(5)
     # speech_module.say(sentence="Hello, I am Fetch. How may I help you?", voice='voice_ked_diphone')

@@ -94,7 +94,7 @@ class Human(threading.Thread):
                 if len(not_allocated_tasks + human_available_wrong_tasks) > 1:
                     self.action_right_choose[action_number] = 1
                 else:
-                    self.action_right_choose[action_number] = 0
+                    self.action_right_choose[action_number] = 1#0
                 self.human_current_action = None
                 self.save_action = 'Assigned_to_Human'
                 travel_distance = self.get_travel_distance(task_color=color)
@@ -129,6 +129,7 @@ class Human(threading.Thread):
                     self.save_action = "Cancel_Assign"
                 else:
                     self.human_wrong_actions.pop(action_number) #todo: how to consider this case?
+
                     self.save_action = "Cancel_Wrong_Assign"
             elif previous_box_state == 'Human':
                 self.human_current_action = None
@@ -137,6 +138,15 @@ class Human(threading.Thread):
                 self.returned_action = action_number
                 if action_number in self.human_wrong_actions:
                     self.human_wrong_actions.pop(action_number)
+                    self.wrong_action_info.pop(action_number)
+                    nt = self.task.n_task_total // 10
+                    error_task_num = int('{}{}'.format(3 * (10 ** nt), action_number))
+                    if error_task_num in self.task.human_error_tasks_return:
+                        self.task.human_error_tasks_return.remove(error_task_num)
+                        self.task.task_to_do.pop(error_task_num)
+                        self.task.task_precedence_dict[action_number].remove(error_task_num)
+                        self.task.tasks_all.remove(error_task_num)
+                        self.task.task_only_robot.remove(error_task_num)
                 # elif action_number > 19:
                 #     pass
                     self.save_action = 'Correct_Return'
