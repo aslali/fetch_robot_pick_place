@@ -4,7 +4,7 @@ import time
 
 # bulb = SmartBulb("129.97.71.104")
 
-IP = "192.168.1.9"
+IP = "10.0.0.106"
 async def get_bulb():
     bulb = SmartBulb(IP)
     return bulb

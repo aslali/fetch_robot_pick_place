@@ -262,13 +262,20 @@ class Fetch(threading.Thread):
 
                 wrong_assign = [ii for ii in self.human.human_wrong_actions if
                                 self.human.human_wrong_actions[ii] == 'Reject']
-                if self.cur_allocated_tasks or self.task.tasks_allocated_to_robot or wrong_assign:
-                    for ts in hum_new_actions:
+                tasks_allocated_to_robot = [ii for ii in self.task.tasks_allocated_to_robot]
+
+                for ts in hum_new_actions:
+                    if self.cur_allocated_tasks or tasks_allocated_to_robot or wrong_assign:
                         if self.human.action_right_choose[ts] == 1:
                             if ts in self.cur_allocated_tasks:
                                 haction = 1
-                            elif ts in self.task.tasks_allocated_to_robot or wrong_assign:
+                                self.cur_allocated_tasks.remove(ts)
+                            elif ts in tasks_allocated_to_robot or wrong_assign:
                                 haction = -1  # Todo: this reduces p_conform significantly
+                                try:
+                                    tasks_allocated_to_robot.remove(ts)
+                                except:
+                                    wrong_assign.remove(ts)
                             else:
                                 haction = 0
 
@@ -353,28 +360,28 @@ class Fetch(threading.Thread):
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(15)
+                            time.sleep(60)
                         send_done_message = True
                     elif next_action['type'] == 'Assigned_to_Robot':
                         if self.robot_connected:
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(15)
+                            time.sleep(60)
                         send_done_message = True
                     elif next_action['type'] == 'Return':
                         if self.robot_connected:
                             self.action(pick_loc=next_action['workspace'] * 10 + next_action['workspace'], place_loc=6,
                                         place_num=1, block_id=next_action['id'])
                         else:
-                            time.sleep(15)
+                            time.sleep(60)
                         send_done_message = True
                     elif next_action['type'] == 'Human_by_Robot':
                         if self.robot_connected:
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(15)
+                            time.sleep(30)
                         send_done_message = True
 
                     if send_done_message:

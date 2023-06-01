@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from scipy.stats import norm
 from scipy.stats import binom
@@ -9,6 +10,7 @@ import gurobipy
 # plt.rcParams['ps.fonttype'] = 42
 # import fontTools
 import pickle
+
 
 import copy
 
@@ -452,7 +454,8 @@ class Planner:
                     # p = max(0.001, (1 - alpha) * (n_not_picked / nhistk))
                     p = max(0.001, (1 - alpha) * (n_not_picked + betaa * n_assign) / denom)
             elif human_action == -1:
-                p = max(0.001, (1 - alpha) * 0.9)
+                p = max(0.001, (1 - alpha) * 0.95)
+                # p = 1
             else:
                 p = 1
 

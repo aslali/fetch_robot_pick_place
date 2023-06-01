@@ -63,45 +63,46 @@ def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_i
 
             dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(),
                                  theta=p2[2])
-            while dro > d_thrd_pick:
-                print('dro is: ', dro, ' pick id is: ', pick_id)
-                print('marker pos is: ', minfo[pick_id][1], 'robot pos is: ', robot_control.fetch_base.get_pose())
-                robot_control.fetch_base.move_forward(distance=dro - d_thrd_pick)
-                dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(),
-                                     theta=p2[2])
-            print ('in the third position')
-            time.sleep(0.5)
-            robot_control.fetch_head.look_at(d_thrd_pick, 0.0, minfo[pick_id][0][2] - 0.3)
-            time.sleep(0.5)
+            if dro < 1.8:
+                while dro > d_thrd_pick:
+                    print('dro is: ', dro, ' pick id is: ', pick_id)
+                    print('marker pos is: ', minfo[pick_id][1], 'robot pos is: ', robot_control.fetch_base.get_pose())
+                    robot_control.fetch_base.move_forward(distance=dro - d_thrd_pick)
+                    dro = d_marker_robot(marker_info=minfo[pick_id][1], rob_pos=robot_control.fetch_base.get_pose(),
+                                         theta=p2[2])
+                print ('in the third position')
+                time.sleep(0.5)
+                robot_control.fetch_head.look_at(d_thrd_pick, 0.0, minfo[pick_id][0][2] - 0.3)
+                time.sleep(0.5)
 
-            ctime = time.time()
-            head_move_cnt = 0
-            while time.time() - ctime < 8:
-                cctime = time.time()
-                while time.time() - cctime < 1:
-                    imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=30), pick_id)
-                    if imd:
+                ctime = time.time()
+                head_move_cnt = 0
+                while time.time() - ctime < 8:
+                    cctime = time.time()
+                    while time.time() - cctime < 1:
+                        imd, ids, minfo = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=30), pick_id)
+                        if imd:
+                            break
+                    if not imd:
+                        if head_move_cnt % 4 == 0 or head_move_cnt % 4 == 1:
+                            robot_control.fetch_head.move_down(offset=0.15)
+                        elif head_move_cnt % 4 == 2 or head_move_cnt % 4 == 3:
+                            robot_control.fetch_head.move_up(offset=0.15)
+                        head_move_cnt += 1
+                    else:
                         break
+
                 if not imd:
-                    if head_move_cnt % 4 == 0 or head_move_cnt % 4 == 1:
-                        robot_control.fetch_head.move_down(offset=0.15)
-                    elif head_move_cnt % 4 == 2 or head_move_cnt % 4 == 3:
-                        robot_control.fetch_head.move_up(offset=0.15)
-                    head_move_cnt += 1
+                    if not returning:
+                        # pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=30), p2)
+                        print("near the table, couldn't find the object and pick id is: ", pick_id)
+                        robot_control.fetch_base.move_backward(distance=0.3)
+                    else:
+                        print('cannot return')
+                        robot_control.fetch_base.move_backward(distance=0.3)
+                        return False
                 else:
                     break
-
-            if not imd:
-                if not returning:
-                    # pick_id = blocks.color2id(pick_col, robot_control.markers.get_markers_info(mode=0, dtime=30), p2)
-                    print("near the table, couldn't find the object and pick id is: ", pick_id)
-                    robot_control.fetch_base.move_backward(distance=0.3)
-                else:
-                    print('cannot return')
-                    robot_control.fetch_base.move_backward(distance=0.3)
-                    return False
-            else:
-                break
 
     blocks.remove_id(pick_id=pick_id)
     pos_base = minfo[pick_id][0]
