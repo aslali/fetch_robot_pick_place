@@ -270,12 +270,15 @@ class Fetch(threading.Thread):
                             if ts in self.cur_allocated_tasks:
                                 haction = 1
                                 self.cur_allocated_tasks.remove(ts)
-                            elif ts in tasks_allocated_to_robot or wrong_assign:
+                            elif (ts in tasks_allocated_to_robot) or (ts in wrong_assign):
                                 haction = -1  # Todo: this reduces p_conform significantly
                                 try:
                                     tasks_allocated_to_robot.remove(ts)
                                 except:
-                                    wrong_assign.remove(ts)
+                                    try:
+                                        wrong_assign.remove(ts)
+                                    except:
+                                        pass
                             else:
                                 haction = 0
 
