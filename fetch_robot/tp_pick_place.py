@@ -119,46 +119,51 @@ def pickplace(robot_control, place_loc, place_num, blocks, pick_loc=None, pick_i
     robot_control.fetch_pick_place.pick()
 
     PLACE_ID = PLACE_IDS[place_loc]
-    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=1, dtime=450),
-                                            PLACE_ID[place_num])
-    p3 = PLACE_TABLE_POS[place_loc]
-    if not imdp:
-        robot_control.fetch_base.goto(x=p3[0], y=p3[1], theta=p3[2])  # x=-2.57
-
-        robot_control.fetch_base.move_forward(distance=0.15)
-        time.sleep(0.5)
-        imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=20),
+    while True:
+        imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=1, dtime=450),
                                                 PLACE_ID[place_num])
-
+        p3 = PLACE_TABLE_POS[place_loc]
         if not imdp:
-            ## robot sweeps its head to find the place location
-            turns, actual_pose = head_slow_sweep(robot_control, pi / 4)
-            for i in turns:
-                ctime = time.time()
-                while time.time() - ctime < 0.2:
-                    imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=20),
-                                                            PLACE_ID[place_num])
-                if imdp:
-                    break
-                else:
-                    robot_control.fetch_head.move_head(i, 0.4)
-                    time.sleep(0.1)
-    if not imdp:  # todo: the robot doesn't release the object. this must be fixed
-        robot_control.fetch_gripper.open()
-        robot_control.fetch_base.move_backward(distance=0.3)
-        return False
+            robot_control.fetch_base.goto(x=p3[0], y=p3[1], theta=p3[2])  # x=-2.57
 
-    p4 = near_table_loc(marker_info=minfop[PLACE_ID[place_num]][1], pick_pos=p3, dxy=0.1)
-    robot_control.fetch_base.goto(x=p4[0], y=p4[1], theta=p4[2])
-    if returning:
-        safety_light(stat=0)
-    else:
-        safety_light(stat=1)
-        robot_control.fetch_voice.say(sentence="I am near the table", voice='voice_kal_diphone')
-    dro = d_marker_robot(marker_info=minfop[PLACE_ID[place_num]][1], rob_pos=robot_control.fetch_base.get_pose(),
-                         theta=p4[2])
-    if dro > d_thrd_place:
-        robot_control.fetch_base.move_forward(distance=dro - d_thrd_place)
+            robot_control.fetch_base.move_forward(distance=0.15)
+            time.sleep(0.5)
+            imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=20),
+                                                    PLACE_ID[place_num])
+
+            if not imdp:
+                ## robot sweeps its head to find the place location
+                turns, actual_pose = head_slow_sweep(robot_control, pi / 4)
+                for i in turns:
+                    ctime = time.time()
+                    while time.time() - ctime < 0.2:
+                        imdp, idsp, minfop = is_marker_detected(robot_control.markers.get_markers_info(mode=0, dtime=20),
+                                                                PLACE_ID[place_num])
+                    if imdp:
+                        break
+                    else:
+                        robot_control.fetch_head.move_head(i, 0.4)
+                        time.sleep(0.1)
+        if not imdp:  # todo: the robot doesn't release the object. this must be fixed
+            robot_control.fetch_gripper.open()
+            robot_control.fetch_base.move_backward(distance=0.3)
+            return False
+
+        p4 = near_table_loc(marker_info=minfop[PLACE_ID[place_num]][1], pick_pos=p3, dxy=0.1)
+        robot_control.fetch_base.goto(x=p4[0], y=p4[1], theta=p4[2])
+        if returning:
+            safety_light(stat=0)
+        else:
+            safety_light(stat=1)
+            robot_control.fetch_voice.say(sentence="I am near the table", voice='voice_kal_diphone')
+        dro = d_marker_robot(marker_info=minfop[PLACE_ID[place_num]][1], rob_pos=robot_control.fetch_base.get_pose(),
+                             theta=p4[2])
+        if dro < 1.4:
+            if dro > d_thrd_place:
+                robot_control.fetch_base.move_forward(distance=dro - d_thrd_place)
+            break
+        else:
+            print('long distance')
 
     time.sleep(0.5)
     robot_control.fetch_head.look_at(d_thrd_place, 0.0, minfop[PLACE_ID[place_num]][0][2] - 0.3)

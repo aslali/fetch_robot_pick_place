@@ -275,10 +275,8 @@ class Fetch(threading.Thread):
                                 try:
                                     tasks_allocated_to_robot.remove(ts)
                                 except:
-                                    try:
-                                        wrong_assign.remove(ts)
-                                    except:
-                                        pass
+                                    wrong_assign.remove(ts)
+
                             else:
                                 haction = 0
 
