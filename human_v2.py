@@ -38,16 +38,9 @@ class Human(threading.Thread):
         action_number, workspace, box = self.get_action_number(action)
         self.last_action_number = action_number
         self.returned_action = None
+        self.action_right_choose[action_number] = 1
         if box_state == 'Human':
             self.human_current_action = action_number
-            # if action_number > 19:
-            #     self.task.task_precedence_dict[action_number] = []
-            #     self.task.task_both.append(action_number)
-            #     self.task.tasks_all.append(action_number)
-            #     self.task.n_tasks()
-            #     self.task_to_do[action_number] = {'workspace': workspace, 'box': box, 'color': color}
-            #     self.task.tasks_required_time(task_num=action_number)
-            #     self.done_tasks.append(action_number)
             self.wait_human = False
 
         elif box_state == 'Assigned_to_Human':
@@ -57,16 +50,6 @@ class Human(threading.Thread):
                 print('Unknown case 1')
 
         elif box_state == 'Assigned_to_Robot':
-            # if action_number > 19:
-            #     self.task.tasks_allocated_to_robot.append(action_number)
-            #     self.task.task_precedence_dict[action_number] = []
-            #     self.task.task_both.append(action_number)
-            #     self.task.tasks_all.append(action_number)
-            #     self.task.n_tasks()
-            #     self.task_to_do[action_number] = {'workspace': workspace, 'box': box, 'color': color}
-            #     self.task.tasks_required_time(task_num=action_number)
-            #     self.action_right_choose[action_number] = 1
-            # else:
             iscor = self.is_correct(color=color, action_number=action_number)
             if iscor:
                 self.task.tasks_allocated_to_robot.append(action_number)
@@ -90,11 +73,11 @@ class Human(threading.Thread):
                 self.human_actions_from_allocated.append(action_number)
                 self.done_tasks.append(action_number)
                 self.task.finished_tasks.append(action_number)
-                not_allocated_tasks, human_available_wrong_tasks = self.get_available_tasks()
-                if len(not_allocated_tasks + human_available_wrong_tasks) > 1:
-                    self.action_right_choose[action_number] = 1
-                else:
-                    self.action_right_choose[action_number] = 1#0
+                # not_allocated_tasks, human_available_wrong_tasks = self.get_available_tasks()
+                # if len(not_allocated_tasks + human_available_wrong_tasks) > 1:
+                #     self.action_right_choose[action_number] = 1
+                # else:
+                #     self.action_right_choose[action_number] = 1#0
                 self.human_current_action = None
                 self.save_action = 'Assigned_to_Human'
                 travel_distance = self.get_travel_distance(task_color=color)
@@ -255,7 +238,7 @@ class Human(threading.Thread):
                                             action_type=self.save_action,
                                             action_number=1)
                 self.save_action = None
-                self.get_available_tasks()
+                # self.get_available_tasks()
                 print('wrong actions: ', self.human_wrong_actions)
                 print('done tasks: ', self.done_tasks)
                 print('from allocated: ', self.human_actions_from_allocated)

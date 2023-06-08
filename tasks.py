@@ -77,12 +77,29 @@ class Task:
         self.n_allocated_task = len(self.tasks_allocated_to_human)
 
     def find_remained_task(self):
-        self.remained_tasks = list(set(self.tasks_all) - set(self.finished_tasks))
-        self.remained_tasks_available_now = list(set(self.remained_tasks) - set([self.temp_unavailable_task]))
-        self.remained_task_human_only = list(set(self.task_only_human) - set(self.finished_tasks))
-        self.remained_task_robot_only = list(set(self.task_only_robot) - set(self.finished_tasks))
-        self.remained_task_both = list(set(self.task_both) - set(self.finished_tasks))
-        self.remained_task_both_available_now = list(set(self.remained_task_both) - set([self.temp_unavailable_task]))
+        def remove_common(a, b):
+            c = copy.copy(a)
+            d = copy.copy(b)
+            for i in a:
+                if i in d:
+                    c.remove(i)
+                    d.remove(i)
+            return c
+
+
+
+        # self.remained_tasks = list(set(self.tasks_all) - set(self.finished_tasks))
+        self.remained_tasks = remove_common(self.tasks_all, self.finished_tasks)
+        # self.remained_tasks_available_now = list(set(self.remained_tasks) - set([self.temp_unavailable_task]))
+        self.remained_tasks_available_now = remove_common(self.remained_tasks, [self.temp_unavailable_task])
+        # self.remained_task_human_only = list(set(self.task_only_human) - set(self.finished_tasks))
+        self.remained_task_human_only = remove_common(self.task_only_human, self.finished_tasks)
+        # self.remained_task_robot_only = list(set(self.task_only_robot) - set(self.finished_tasks))
+        self.remained_task_robot_only = remove_common(self.task_only_robot, self.finished_tasks)
+        # self.remained_task_both = list(set(self.task_both) - set(self.finished_tasks))
+        self.remained_task_both = remove_common(self.task_both, self.finished_tasks)
+        # self.remained_task_both_available_now = list(set(self.remained_task_both) - set([self.temp_unavailable_task]))
+        self.remained_task_both_available_now = remove_common(self.remained_task_both, [self.temp_unavailable_task])
 
     def creat_precedence_matrix(self, precedence_dict):
         n_task = len(precedence_dict)

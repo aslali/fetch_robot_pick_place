@@ -81,7 +81,7 @@ team_server.start()
 
 
 
-measure = measure.Measure(directory='17875', case_name='task4.pickle')
+measure = measure.Measure(directory='18327', case_name='task4.pickle')
 print('phase1')
 human = human_v2.Human(task=task, team_server=team_server, measure=measure)
 # human.daemon = True
