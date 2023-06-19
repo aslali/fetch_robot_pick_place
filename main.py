@@ -8,7 +8,7 @@ import measure
 
 
 human_speed = 1
-pattern_number = 2
+pattern_number = 3
 
 
 # pattern = [
@@ -81,7 +81,7 @@ team_server.start()
 
 
 
-measure = measure.Measure(directory='15580', case_name='task4.pickle')
+measure = measure.Measure(directory='11520', case_name='task4.pickle')
 print('phase1')
 human = human_v2.Human(task=task, team_server=team_server, measure=measure)
 # human.daemon = True
