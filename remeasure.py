@@ -93,7 +93,7 @@ def plot_frames(data):
         # plt.show()
         figname = 'video1/frame' + str(i) + '.png'
         fig.savefig(figname, format='png', bbox_extra_artists=(lgd,), bbox_inches='tight')
-file = open('14974/task3.pickle', 'rb') #18178
+file = open('14336/task3.pickle', 'rb') #18178
 data = pickle.load(file)
 creat_table(data)
 # plot_frames(data)
