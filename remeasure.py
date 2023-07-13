@@ -1,6 +1,11 @@
 import pickle
 import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+
+
+
+
 plt.rcParams['pdf.fonttype'] = 42
 plt.rcParams['ps.fonttype'] = 42
 
@@ -94,7 +99,7 @@ def plot_frames(data):
         figname = 'video1/frame' + str(i) + '.png'
         fig.savefig(figname, format='png', bbox_extra_artists=(lgd,), bbox_inches='tight')
 file = open('14336/task3.pickle', 'rb') #18178
-data = pickle.load(file)
+data = pickle.load(file, encoding='latin1')
 creat_table(data)
 # plot_frames(data)
 plot_human_measures(data)
