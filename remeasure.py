@@ -1,6 +1,8 @@
 import pickle
-import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 plt.rcParams['pdf.fonttype'] = 42
 plt.rcParams['ps.fonttype'] = 42
 
@@ -25,6 +27,36 @@ def plot_human_measures(data):
     ax.tick_params(axis='y', labelsize=16)
     plt.show()
 
+def plot_human_measures_normalized(data):
+    fig, ax = plt.subplots()
+    x_val1 = [x[0]/data.p_f[-1][0] for x in data.p_f]
+    y_val1 = [x[1] for x in data.p_f]
+    x_val2 = [x[0]/data.p_f[-1][0] for x in data.p_e]
+    y_val2 = [x[1] for x in data.p_e]
+    ax.plot(x_val1, y_val1, linewidth=3)
+    ax.plot(x_val2, y_val2, linewidth=3)
+    ax.set_xlabel('time (s)', fontsize=16)
+    ax.set_ylabel(r'$p_e, p_f$',fontsize=20)
+    lgd = ax.legend([r'$p_f$', r'$p_e$'], fontsize=15, loc='upper left', frameon=False,
+                    bbox_to_anchor=(0.25, 1), ncol=2)
+    ax.set_title(r'Bayes estimate of $p_e$ and $p_f$', fontsize=16)
+    ax.set_ylim([0, 1.19])
+    ax.set_xlim([0, round(x_val1[-1] + 0.1)])
+    ax.set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax.set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax.tick_params(axis='x', labelsize=16)
+    ax.tick_params(axis='y', labelsize=16)
+
+
+    xarr = np.array(x_val1)
+    yarr = np.array(y_val1)
+    poly = PolynomialFeatures(degree=3, include_bias=False)
+    xpoly = poly.fit_transform(xarr.reshape(-1, 1))
+    poly_reg_model = LinearRegression()
+    poly_reg_model.fit(xpoly, yarr)
+    y_predicted = poly_reg_model.predict(xpoly)
+    plt.plot(xarr, y_predicted, color='purple')
+    plt.show()
 def creat_table(data):
     wrong = [x[2] for x in data.action_times_human if (x[2] == 'Wrong_Return' or x[2] == 'Reject' or x[2] == 'Return')]
     wrong_corrected = [x[2] for x in data.action_times_human if (x[2] == 'Correct_Return' or x[2] == 'Cancel_Wrong_Assign')]
@@ -97,7 +129,7 @@ file = open('14336/task3.pickle', 'rb') #18178
 data = pickle.load(file)
 creat_table(data)
 # plot_frames(data)
-plot_human_measures(data)
+plot_human_measures_normalized(data)
 
 
 
