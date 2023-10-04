@@ -361,28 +361,28 @@ class Fetch(threading.Thread):
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(50)
+                            time.sleep(100)
                         send_done_message = True
                     elif next_action['type'] == 'Assigned_to_Robot':
                         if self.robot_connected:
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(50)
+                            time.sleep(100)
                         send_done_message = True
                     elif next_action['type'] == 'Return':
                         if self.robot_connected:
                             self.action(pick_loc=next_action['workspace'] * 10 + next_action['workspace'], place_loc=6,
                                         place_num=1, block_id=next_action['id'])
                         else:
-                            time.sleep(50)
+                            time.sleep(100)
                         send_done_message = True
                     elif next_action['type'] == 'Human_by_Robot':
                         if self.robot_connected:
                             self.action(block_col=next_action['color'], place_num=next_action['box'],
                                         place_loc=next_action['workspace'])
                         else:
-                            time.sleep(50)
+                            time.sleep(100)
                         send_done_message = True
 
                     if send_done_message:
