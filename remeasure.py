@@ -1,18 +1,10 @@
 import pickle
-<<<<<<< HEAD
 import matplotlib
 matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-
-
-
-
-=======
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
->>>>>>> b297fcef17cf2b4045db17c673aedf883b08f2ef
 plt.rcParams['pdf.fonttype'] = 42
 plt.rcParams['ps.fonttype'] = 42
 
